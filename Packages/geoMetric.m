@@ -19,18 +19,23 @@
 
 
 
+AppendTo[$Path,ToFileName[{NotebookDirectory[]}]];
+<<commons.m
+<<algebraDirac.m
+
+
 metric[sign_Integer/;sign==1||sign==-1||sign==0][vielb_List]:=Module[{dim,ans,\[Eta]},
 dim=Length[vielb];\[Eta]=IdentityMatrix[dim];\[Eta][[1,1]]=-1;If[sign!=0,minkMetric=-sign \[Eta];ans=Transpose[vielb].minkMetric.vielb//FullSimplify,
 ans=Transpose[vielb].vielb//FullSimplify
 ];
 ans]
-metric::usage="First argument: 1 -> (+, -, -, ...), -1 -> (-, +, +, ...), 0-> Euclidean. Second argument: vielbein as a matrix. It also returns minkMetric in the specified convention.";
+metric::usage="metric[sign][vielbeinMatrix], where sign canbe: 1 -> (+, -, -, ...), -1 -> (-, +, +, ...), 0-> Euclidean. Note that minkMetric is global.";
 
 induced[matrix_List,coord_List,inducedCoord_List,pullback_List]:=Module[
 {pullbackRule=listsToRule[coord, pullback]},
 Transpose[Grad[pullback,inducedCoord]].(matrix/.pullbackRule).Grad[pullback,inducedCoord]
 ]
-induced::usage="The inputs are: the coordinates, the induced coordinates and the pullback of the coordinates.";
+induced::usage="induced[matrix, coord, inducedCoord, pullback] returns a the induced matrix.";
 
 hodgeDual[component_,position_List, metric_List]:=Module[{dim,len,posHX,invMetric,ans},
 dim=Length@metric;
@@ -45,8 +50,8 @@ Signature@Join[position,posHX](*this plays the Role of Levi-Civita symbol*),
 component]/.Abs->Identity (*Abs has already removed the explicit minus*);
 {ans,posHX}
 ]
-hodgeDual::usage="(*A\!\(\*SubscriptBox[\()\), \(\*SubscriptBox[\(\[Mu]\), \(1\)] \[Ellipsis] \*SubscriptBox[\(\[Mu]\), \(n\)]\)]\)\[Congruent]\!\(\*FractionBox[\(1\), \(p!\)]\)\!\(\*SqrtBox[\(\(|\)\(g\)\(|\)\)]\)\!\(\*SubscriptBox[\(\[Epsilon]\), \(\*SubscriptBox[\(\[Mu]\), \(1\)] \[Ellipsis] \*SubscriptBox[\(\[Mu]\), \(\(n\)\(-\)\(p\)\(\\\ \)\)] \*SubscriptBox[\(\[Mu]\), \(n - p + 1\)] \[Ellipsis] \*SubscriptBox[\(\[Mu]\), \(n\)]\)]\) \!\(\*SuperscriptBox[\(g\), \(\*SubscriptBox[\(\[Mu]\), \(n - p + 1\)] \*SubscriptBox[\(\[Nu]\), \(1\)]\)]\)\[Ellipsis] \!\(\*SuperscriptBox[\(g\), \(\*SubscriptBox[\(\[Mu]\), \(n\)] \*SubscriptBox[\(\[Nu]\), \(p\)]\)]\) \!\(\*SubscriptBox[\(A\), \(\*SubscriptBox[\(\[Nu]\), \(1\)] \*SubscriptBox[\(\[Ellipsis]\[Nu]\), \(p\)]\)]\), where \!\(\*SubscriptBox[\(\[Epsilon]\), \(\(123 ... \) n\)]\) = 1. 
-Note that if we perform a parity transformation like \!\(\*SuperscriptBox[\(x\), \(1\)]\) -> -\!\(\*SuperscriptBox[\(x\), \(1\)]\), the new \!\(\*SubscriptBox[\(\[Epsilon]\), \(\(123 ... \) n\)]\) = -1. This case is not considered here. ";
+hodgeDual::usage="hodgeDual[component, component's index as a list, metric] -> {hodge dual of the component, index as a list} 
+Note the Levi-Civita tensor's convention is \!\(\*SubscriptBox[\(\[Epsilon]\), \(\(12 .. \) n\)]\) = 1. ";
 
 
 christoffelS[X_?ListQ, G_?ListQ]:=Module[{dim,invMetric,array},
@@ -123,72 +128,16 @@ Signature[input]HoldForm@name@@sorted,
 0
 ]
 ]
-formSkeleton::usage="It returns the HoldForm of the component of the name. The non-vanishing component is specified by listOflists.";
+formSkeleton::usage="formSkeleton[name][{{1,2,3},{5,6,7}}][1,3,2] returns -HoldForm[name][1,2,3]. The non-specified components are 0. It incorporates the antisymmetry of the forms.";
 
 
-Unprotect[NonCommutativeMultiply];
-a_**0=0**a_=0;
-a_**1=1**a_=a;
-
-nonCommutativeHead[nc_]:=Module[{},
-(* Distribution over Plus *)
-NonCommutativeMultiply[a_Plus,nc[x___]]:=Plus@@(NonCommutativeMultiply[#,nc[x]]&/@Expand@a);
-NonCommutativeMultiply[nc[x___],b_Plus]:=Plus@@(NonCommutativeMultiply[nc[x],#]&/@Expand@b);
-NonCommutativeMultiply[a_Plus,f__ nc[x___]]:=f Plus@@(NonCommutativeMultiply[#,nc[x]]&/@Expand@a);
-NonCommutativeMultiply[f__ nc[x___],b_Plus]:=f Plus@@(NonCommutativeMultiply[nc[x],#]&/@Expand@b);
-NonCommutativeMultiply[a_Plus,b_Plus]:=Module[{l1, temp},
-l1=List@@Expand@a;
-temp=Table[l1[[i]]**Expand@b,{i,1,Length@l1}]//Flatten;
-(Plus@@temp)//Expand
-];
-
-NonCommutativeMultiply[f__  nc[x___],nc[y___]]:=f NonCommutativeMultiply[nc[x],nc[y]];
-NonCommutativeMultiply[ nc[x___],f__ nc[y___]]:=f NonCommutativeMultiply[nc[x],nc[y]];
-NonCommutativeMultiply[f__ nc[x___],g__ nc[y___]]:=f g NonCommutativeMultiply[nc[x],nc[y]];
-NonCommutativeMultiply::usage="It applies to nc head only. The rules are defined for 2 input arguments, with Plus or nc head.";
-];
-nonCommutativeHead::usage="Defines the head of the noncommutative function";
-
-
-
-Clear[antisym,gammaContract,ncContract,basis,basisSort]
-
-ncContract[\[CapitalGamma]_][x___]:=ncContract[\[CapitalGamma]][
-ncContract[\[CapitalGamma]]@@Most@{x},
-Last@{x}
+basis[\[CapitalGamma]_][expr_]:=If[
+ToString@Head@expr == ToString@\[CapitalGamma], 
+{expr},
+Cases[Apply[List,expr/.{Plus->List,Times->List}//Flatten],_\[CapitalGamma]]
 ]
-ncContract[\[CapitalGamma]_][x_,y_]:=Module[{a,b},
-Expand[NonCommutativeMultiply[x,y]/.\[CapitalGamma][a___]**\[CapitalGamma][b___]->\[CapitalGamma][a,b]]
-]
-ncContract::usage="Recursively applies NonCommutativeMultiply and does the contraction for the head declared in nonCommutativeHead. Note that one can use \[CapitalGamma][] as the identity element of the basis \[CapitalGamma][x].";
-
-antisym[\[CapitalGamma]_][x__]:=Module[{list,sortedList},
-list={x};
-sortedList=Sort[list];
-Signature[list] \[CapitalGamma]@@sortedList
-];
-antisym::usage="It builds a function antisymmetric in its indices. The head of the antisymmetric function must be especified.";
-
-gammaContract[signature_Integer/;-1<= signature<= 1][b___,a_,c___,a_,d___]:=Module[{l1, l2,g},
-l1={c};
-l2={b,c,d};
-g=gammaContract[signature]@@l2;
-Which[
-signature==0,If[EvenQ[Length@l1]==True,g, - g],
-a==1,If[EvenQ[Length@l1]==True,signature*g, -signature*g],
-True,If[EvenQ[Length@l1]==True,-signature*g, signature*g]
-]
-]
-gammaContract::usage="gammaContract[sign][1,2,...] means the product of Dirac gamma matrices, where sign=0 uses (+,+,+,...), sign=-1 uses (-,+,+,...) and sign=1 uses (+,-,-,...). ";
-gammaContract[signature_?IntegerQ/;-1<= signature<= 1][]=1; 
-
-
-zero[x___]:=0;
-
-basis[\[CapitalGamma]_][x_]:=Flatten[
-Cases[#,_\[CapitalGamma]]& @(List@@x/.{Plus->List,Times->List}//Flatten)
-]
-basis::usage = "It looks for functions with the specified head. It works only for level 1 expressions.";
+basis::usage = "basis[\[CapitalGamma]][expr]. Example: expr = a + b \[CapitalGamma][1] + c \[CapitalGamma][1, 2] + ..., it will extract {\[CapitalGamma][1], \[CapitalGamma][1,2]}.
+Use addUnitBasis[\[CapitalGamma]][expr] to add \[CapitalGamma][] to coefficient a. ";
 
 sort[f_[]]:=1; (*f[] as a unit basis*)
 sort[f_[x__]]:=Signature[{x}]f@@Sort[{x}]
@@ -202,45 +151,23 @@ rule=Table[base[[i]]->(sort/@base)[[i]],{i,1,Length@base}];
 z=y/.rule;
 Collect[z,basis[\[CapitalGamma]][z]]
 ]
-basisSort::usage="It collects the expression according to its basis (i.e. function with the specified head). ";
+basisSort::usage="basisSort[\[CapitalGamma]][expr] collects the expression according to its basis (i.e. function with the specified head). It uses sort[].";
 
 baseCoefForm[\[CapitalGamma]_][expr_]:=Module[{new, base},
 new=basisSort[\[CapitalGamma]][expr];
 base=basis[\[CapitalGamma]][new];
 listsToRule[
 Prepend[base,Identity], 
-Prepend[Coefficient[new,base],new/.\[CapitalGamma]-> nil]
+Prepend[Coefficient[new,base],new/.\[CapitalGamma]-> zero]
 ]
 ]
-baseCoefForm::usage="For the given head of the basis and the expression, it will return: {basis1 -> coefficient1, ...}, Unit basis, named as Identity, is included.";
+baseCoefForm::usage="baseCoefForm[\[CapitalGamma]][expr], where expr contains \[CapitalGamma], will return: {basis1 -> coefficient1, ...}. If there's no unit basis, it will be named as Identity.";
 
 addUnitBasis[\[CapitalGamma]_][x__]:=Module[{coefId},
-coefId=x/.\[CapitalGamma]->nil;
+coefId=x/.\[CapitalGamma]->zero;
 coefId*\[CapitalGamma][]-coefId +x
 ]
-addUnitBasis::usage="For basis with head \[CapitalGamma], it adds unity, which is represented by \[CapitalGamma][]. This helps to treat all the terms of the expression at the same footing under, for example, NonCommutativeMultiply.";
-
-
-blockDiagonalMatrix[a_?ArrayQ,b_?ArrayQ]:=Module[
-{la=Length@a, lb=Length@b,l,M},
-l=la+lb;
-M=ConstantArray[0,{l,l}];
-Table[M[[i,j]]=a[[i,j]],{i,1,la},{j,1,la}];
-Table[M[[i+la,j+la]]=b[[i,j]],{i,1,lb},{j,1,lb}];
-M
-]
-
-listsToRule[l1_List,l2_List]:=Module[{l},
-l=Length@l1;
-(l1[[#]]->l2[[#]])&/@Range[l]
-]
-listsToRule::usage=" Rule applied elementwise for two lists.";
-
-listsToRuleBox[list_List]:=listsToRule[list,Table[\[Placeholder],Range[10]]];
-listsToRuleBox::usage="It helps to define a list of rules output of an input list."
-
-toSuperscriptRule[\[CapitalGamma]_]:={\[CapitalGamma][x__]-> Superscript[\[CapitalGamma],{x}]};
-toSubscriptRule[\[CapitalGamma]_]:={\[CapitalGamma][x__]-> Subscript[\[CapitalGamma],{x}]};
+addUnitBasis::usage="addUnitBasis[\[CapitalGamma]][expr] adds unity, which is represented by \[CapitalGamma][] to expr if it doesn't have it. This helps to treat all the terms of the expression at the same footing under, for example, NonCommutativeMultiply.";
 
 
 poincarePatch[n_][x_,z_]:=Module[{coord,vierb},
@@ -248,11 +175,14 @@ coord={ToExpression@Table[ToString@x<> ToString[i],{i,1,n-1}],z}//Flatten;
 vierb=DiagonalMatrix@Table[1/z,{i,1,n}];
 {coord,vierb}
 ]
+poincarePatch ::usage ="poincarePatch[dim][x, z] -> {coord, vielbeinMatrix}";
+
 horosphericAdS[n_][x_,r_]:=Module[{coord,vierb},
 coord={ToExpression@Table[ToString@x<> ToString[i],{i,1,n-1}],r}//Flatten;
 vierb=DiagonalMatrix[Append[Table[E^r,{i,1,n-1}],1]];
 {coord,vierb}
 ]
+horosphericAdS ::usage ="horosphericAdS[dim][x, r] -> {coord, vielbeinMatrix}";
 
 
 spherical[n_][\[Phi]_]:=Module[{coord,vierb},
@@ -264,47 +194,8 @@ Product[Sin[ToExpression[ToString[\[Phi]]<>ToString[k]]],{k,1,i-1}],
 ];
 {coord,vierb}
 ]
-
+spherical ::usage ="spherical[dim][\[Phi]] -> {coord, vielbeinMatrix}, coord = {\[Phi]1,..., \[Phi]dim}";
 volSph[n_]:=\[Pi]^(n/2)/Gamma[n/2+1]
-
-
-poincareSph[x_,z_,\[Theta]_]:=Module[{coord1, vierb1, vierb1Matrix,coord, vierb},
-Clear[ee];
-{coord1,vierb1Matrix}=poincarePatch[5][x,z];
-coord=Join[
-coord1,
-{\[Theta]},
-ToExpression@Table[ToString@x<> ToString[i],{i,7,10}]];
-vierb1=(Most@ArrayRules[vierb1Matrix])[[;;,2]];
-
-Print[Style["Vierbeins of S4 sphere: ee ", FontColor->Red]];
-vierb=DiagonalMatrix@Join[
-vierb1,
-{1},
-Table[ Sin[\[Theta]]ee[i],{i,7,10}](* ee are the vierbeins of S4 sphere *)
-] ;
-{coord, vierb}
-]
-
-poincareHopf[x_,z_,\[Theta]_,\[Phi]_]:=Module[{coord1, vierb1, vierb1Matrix, coord, vierb},
-Clear[ee];
-{coord1,vierb1Matrix}=poincarePatch[5][x,z];
-coord=Join[
-coord1,
-{\[Theta]},
-ToExpression@Table[ToString@x<> ToString[i],{i,7,9}],
-{\[Phi]}];
-vierb1=(Most@ArrayRules[vierb1Matrix])[[;;,2]];
-
-Print[Style["Vierbeins of S3 sphere: ee ", FontColor->Red]];
-vierb=DiagonalMatrix@Join[
-vierb1,
-{1},
-Table[ Cos[\[Theta]]ee[i],{i,7,9}],(* ee are the vierbeins of S3 sphere *)
-{Sin[\[Theta]]}
-] ;
-{coord, vierb}
-]
 
 
 
