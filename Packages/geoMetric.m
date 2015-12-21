@@ -24,12 +24,16 @@ AppendTo[$Path,ToFileName[{NotebookDirectory[]}]];
 <<algebraDirac.m
 
 
+metricMink[sign_Integer/;sign==1||sign==-1][dim_]:=-sign DiagonalMatrix[Prepend[ConstantArray[1,dim-1],-1]]
+metricMink::usage="metricMink[sign][dim], where sign can be 1 or -1, for mostly minus and mostly plus signature, respectively. ";
+
 metric[sign_Integer/;sign==1||sign==-1||sign==0][vielb_List]:=Module[{dim,ans,\[Eta]},
-dim=Length[vielb];\[Eta]=IdentityMatrix[dim];\[Eta][[1,1]]=-1;If[sign!=0,minkMetric=-sign \[Eta];ans=Transpose[vielb].minkMetric.vielb//FullSimplify,
+dim=Length[vielb];
+If[sign!=0,ans=Transpose[vielb].metricMink[sign][dim].vielb//FullSimplify,
 ans=Transpose[vielb].vielb//FullSimplify
 ];
 ans]
-metric::usage="metric[sign][vielbeinMatrix], where sign canbe: 1 -> (+, -, -, ...), -1 -> (-, +, +, ...), 0-> Euclidean. Note that minkMetric is global.";
+metric::usage="metric[sign][vielbeinMatrix], where sign can be: 1 -> (+, -, -, ...), -1 -> (-, +, +, ...), 0 -> Euclidean.";
 
 induced[matrix_List,coord_List,inducedCoord_List,pullback_List]:=Module[
 {pullbackRule=listsToRule[coord, pullback]},
