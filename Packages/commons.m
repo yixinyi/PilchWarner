@@ -33,3 +33,10 @@ partition[dim_,n_]:=Module[{perm, ans},
 perm=Sort/@Permutations[Range[dim],{n}]; 
 ans=DeleteDuplicates@perm
 ](*It's inefficient*)
+
+
+intByParts[u_,dv_][x_]:=Module[{v},
+v=Integrate[dv,x];
+u v - Integrate[v D[u,x],x]
+]
+intByParts::usage="intByParts[u, dv][x] does the integration by parts: \[Integral]u dv = u v - \[Integral]v du ";
