@@ -4,6 +4,7 @@ This repository contains a folder called Packages, which contains Mathematica pa
 * The geoMetric package uses commons.m and algebraDirac.m. <br />
 * The PilchWarner package contains the Pilch-Warner geometry and its background fields, from the reference paper: <br />
 http://arxiv.org/abs/hep-th/0306098 <br />
+* Dbrane contains the kappa-symmetry projector. It uses matrixEDC.m
 * matrixEDC.m is taken from: <br />
 http://www.inp.demokritos.gr/~sbonano/EDC/ <br />
 It's used only for exterior products and derivatives. <br />
@@ -11,12 +12,14 @@ It's used only for exterior products and derivatives. <br />
 The files in the main folder use the packages above. They are: <br />
 * SupergravityPW.nb, that checks the supergravity equations for the Pilch Warner background. <br />
 * SusyPW.nb, that computes the dilatino's and gravitino's variational equation for Pilch Warner geometry.
+* D3branePW.nb 
  
 
 
 # HOW TO USE THE PACKAGES #
 
-Please check either Supergravity.nb or SusyPW.nb, where I load the packages by adding its directory to $PATH and then, use Get (<<).
+Please check either Supergravity.nb or SusyPW.nb, where I loaded the packages by adding its directory to $PATH and then, use Get (<<).
+
 
 
 
