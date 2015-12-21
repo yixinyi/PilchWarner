@@ -38,7 +38,8 @@ AppendTo[$Path,ToFileName[{NotebookDirectory[]}]];
 <<geoMetric.m
 
 
-Clear[x0,x1,x2,x3,rc,\[Theta],\[Phi],\[Sigma]1,\[Sigma]2,\[Sigma]3]
+Clear[x0,x1,x2,x3,rc,\[Theta],\[Phi],\[Sigma]1,\[Sigma]2,\[Sigma]3, \[Alpha], \[Beta],\[Psi]]
+
 coordLabel=<|
 x0-> 1,x1-> 2,x2-> 3,x3-> 4,rc-> 5,
 \[Theta]-> 6,\[Sigma]1-> 7,\[Sigma]2-> 8,\[Sigma]3->9,\[Phi]->10
@@ -685,7 +686,9 @@ formSkeleton[name][F1list][i]
 PWr:=Module[{},
 clearPWr;
 
-rRule:={rc->r,signOrientation->  signature * 1 (* transformation of Levi-Civita tensor *)};
+rRule:={rc->r,
+signOrientation->  signature * 1 (* transformation of Levi-Civita tensor *)};
+
 vRule ={
 vx-> Function[{r,\[Theta]},\[Rho][r]^(3/2)/Sqrt[c[r]^2-1] (c[r]X2[r,\[Theta]]X1[r,\[Theta]])^(1/8)],
 vrc-> Function[{r,\[Theta]},1/\[Rho][r]^(1/2) (c[r]X1[r,\[Theta]]X2[r,\[Theta]])^(1/8)],
@@ -700,11 +703,11 @@ b->Function[{r,\[Theta]},(Sqrt[c[r] X1[r,\[Theta]]]-Sqrt[X2[r,\[Theta]]])/(Sqrt[
 B->Function[{r,\[Theta],\[Phi]},b[r,\[Theta]]E^(I 2\[Phi])],
 f->Function[{r,\[Theta]},1/Sqrt[1-b[r,\[Theta]]^2]],
 
-
 \[Omega]->Function[{r,\[Theta]},(\[Rho][r]^6 X1[r,\[Theta]])/(4 (-1+c[r]^2)^2)],
 a1->Function[{r,\[Theta]},-(Sqrt[c[r]^2-1]/c[r])Cos[\[Theta]]],
 a2->Function[{r,\[Theta]}, \[Rho][r]^6 Sqrt[c[r]^2-1]/X1[r,\[Theta]] Sin[\[Theta]]Cos[\[Theta]]^2],
 a3->Function[{r,\[Theta]},-(Sqrt[c[r]^2-1]/X2[r,\[Theta]])Sin[\[Theta]]Cos[\[Theta]]^2]
+(* Note that I use: \[ScriptCapitalA]=\[ExponentialE]^(\[ImaginaryI] \[Phi])(-\[ImaginaryI] a1[c,\[Theta]]d[\[Theta]]\[Wedge]\[Sigma]1 + \[ImaginaryI] a2[c,\[Theta]] \[Sigma]2\[Wedge]\[Sigma]3 + a3[c,\[Theta]] \[Sigma]1\[Wedge]d[\[Phi]]) *)
 };
 
 X1X2Rule={
@@ -712,17 +715,18 @@ X1->Function[{r,\[Theta]},Cos[\[Theta]]^2+c[r] \[Rho][r]^6 Sin[\[Theta]]^2],
 X2->Function[{r,\[Theta]},c[r] Cos[\[Theta]]^2+\[Rho][r]^6 Sin[\[Theta]]^2]
 };
 c\[Rho]Rule1={Derivative[2][c][r_]-> D[\[Rho][r]^4 (1-c[r]^2),r],Derivative[2][\[Rho]][r_]->D[ 1/3 (1/\[Rho][r]-c[r]\[Rho][r]^5),r]};
-(*Note that Mathematica interprested wrongly c'' as Power[c,'']!*)
+(*Note that Mathematica interpreted wrongly c'' as Power[c,'']!*)
 c\[Rho]Rule2={Derivative[1][c][r_]-> \[Rho][r]^4 (1-c[r]^2),Derivative[1][\[Rho]][r_]-> 1/3 (1/\[Rho][r]-c[r]\[Rho][r]^5)};
 ]
-PWr::usage="It contains: rRule, vRule (vierbeins), formsRules (applied more than once), X1X2Rule, c\[Rho]Rule1, c\[Rho]Rule2";
+PWr::usage="It contains: rRule, vRule (vierbeins), formsRules (apply more than once), X1X2Rule, c\[Rho]Rule1, c\[Rho]Rule2";
 
 clearPWr:=Clear[vRule,formsRules,X1X2Rule,rRule, c\[Rho]Rule1, c\[Rho]Rule2];
 
 
 PWc:=Module[{},
 clearPWc;
-cRule:={rc-> c,signOrientation-> signature * (-1) (* transformation of Levi-Civita*)};
+cRule:={rc-> c,
+signOrientation-> signature * (-1) (* transformation of Levi-Civita*)};
 prefactor[c_,\[Theta]_]:=(c X2[c,\[Theta]]X1[c,\[Theta]])^(1/8)/A[c]^(1/4);
 vRule={vx-> Function[{c,\[Theta]},prefactor[c,\[Theta]]Sqrt[A[c]/(c^2-1)]],
 vrc->Function[{c,\[Theta]},prefactor[c,\[Theta]] 1/(Sqrt[A[c]](c^2-1))], 
@@ -759,7 +763,7 @@ FullForm]\)[c_]-> (2 A[c])/(-1+c^2)};
 
 explicitARule={A-> Function[c,c+(c^2-1) 1/2 Log[(c-1)/(c+1)]]};
 ]
-PWc::usage="It contains: cRule, vRule (vierbeins), formsRules (applied more than once), X1X2Rule, ARule and explicitARule (A[c]=\[Rho][c\!\(\*SuperscriptBox[\(]\), \(6\)]\))";
+PWc::usage="It contains: cRule, vRule (vierbeins), formsRules (apply more than once), X1X2Rule, ARule and explicitARule (A[c]=\[Rho][c\!\(\*SuperscriptBox[\(]\), \(6\)]\))";
 clearPWc:=Clear[prefactor,vRule,formsRules,X1X2Rule,ARule,explicitARule,cRule];
 
 
