@@ -12,7 +12,9 @@ It's used only for exterior products and derivatives. <br />
 The files in the main folder use the packages above. They are: <br />
 * SupergravityPW.nb, that checks the supergravity equations for the Pilch Warner background. <br />
 * SusyPW.nb, that computes the dilatino's and gravitino's variational equation for Pilch Warner geometry.
-* D3branePW.nb 
+* D3branePW.nb, which contains computations for the paper <br />
+http://arxiv.org/pdf/1512.06420v1.pdf <br />
+
  
 
 
