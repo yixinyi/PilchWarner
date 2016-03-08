@@ -65,7 +65,7 @@ dim=Length@coord;
 \[Gamma]Form[n_]:=formConstruct[coord][\[Gamma],n];
 Fform=wedgeForm[coord][Fcoef, Fbasis];
 expr=Sum[1/n! wedgePower[Fform,n],{n,0,dim+1}]\[Wedge]Sum[\[Gamma]Form[n]\[ScriptCapitalK]^Mod[n/2,2],{n,0,dim,2}];
-projectDim[expr,dim]/.listsToRule[d[coord],d/@Array[\[Xi],dim]]/.Wedge[x__]-> 1
+projectDim[expr,dim]/.listsToRule[d[coord],d/@Array[\[Xi],dim]]/.Wedge[x__]-> 1/.\[CapitalGamma]-> antisym[\[CapitalGamma]]
 (* The names of the coordinates are replaced to an ordered array, in order to sort the basis. Then, I make the basis disappear in the last replacement rule *)
 ]
 dBraneProj::usage="dBraneProj[coord][Fcoef, Fbasis] returns the STRIPPED, i.e. no prefactor (-1/LDBI/exp(Dilaton)), nor \[ScriptCapitalI] in the rightmost side, kappa symmetry projector of the Dbrane specified by coord with field F = {coef_List, basis_List}. \[ScriptCapitalK]\[Psi] = \!\(\*SuperscriptBox[\(\[Psi]\), \(*\)]\) and \[ScriptCapitalI]\[Psi] = -i\[Psi], where \[Psi] is a spinor. See Skenderis-Taylor hep-th/0204054.";
