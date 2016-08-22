@@ -14,7 +14,9 @@ The files in the main folder use the packages above. They are: <br />
 * **SusyPW.nb**, that computes the dilatino's and gravitino's variational equation for Pilch Warner geometry.
 * **D3branePW.nb**, which contains computations for the paper <br />
 http://arxiv.org/pdf/1512.06420v1.pdf <br />
-(Note that there are small typos in the paper that will be fixed soon. The PilchWarner package is so far correct.)
+(Note that there are small typos in the paper that will be fixed soon. The PilchWarner package is so far correct.) <br />
+
+**This repository will be upgraded and extended soon!**
  
 
 
