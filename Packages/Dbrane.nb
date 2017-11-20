@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     35061,        918]
-NotebookOptionsPosition[     33655,        865]
-NotebookOutlinePosition[     34055,        882]
-CellTagsIndexPosition[     34012,        879]
+NotebookDataLength[     40320,       1027]
+NotebookOptionsPosition[     38713,        968]
+NotebookOutlinePosition[     39184,        986]
+CellTagsIndexPosition[     39141,        983]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -49,8 +49,7 @@ Cell[BoxData[{
       RowBox[{"NotebookDirectory", "[", "]"}], "}"}], "]"}]}], "]"}], 
   ";"}], "\[IndentingNewLine]", 
  RowBox[{"<<", "matrixEDC.m"}], "\[IndentingNewLine]", 
- RowBox[{"<<", "commons.m"}], "\[IndentingNewLine]", 
- RowBox[{"<<", "algebraDirac.m"}]}], "Input",
+ RowBox[{"<<", "algebraDirac`"}]}], "Input",
  InitializationCell->True,
  CellChangeTimes->{{3.643430032550845*^9, 3.643430036130816*^9}, {
    3.6434657366829057`*^9, 3.6434657401952515`*^9}, {3.6464709295078773`*^9, 
@@ -68,7 +67,8 @@ Cell[BoxData[{
    3.6576358238908978`*^9}, {3.6591672929693613`*^9, 3.659167295983918*^9}, {
    3.659167415548061*^9, 3.659167420464487*^9}, {3.659167958559637*^9, 
    3.659167963924466*^9}, {3.6592644407824917`*^9, 3.659264441362849*^9}, {
-   3.659340588862616*^9, 3.659340596040349*^9}}],
+   3.659340588862616*^9, 3.659340596040349*^9}, {3.666521440962208*^9, 
+   3.666521441257959*^9}, 3.672574387794303*^9}],
 
 Cell[CellGroupData[{
 
@@ -326,7 +326,55 @@ Cell[TextData[Cell[BoxData[{
   3.651309490109541*^9}, {3.651309591947158*^9, 3.651309664758676*^9}, {
   3.651309702242867*^9, 3.6513097233831997`*^9}, {3.653038055254895*^9, 
   3.653038055254938*^9}}]
-}, Open  ]]
+}, Closed]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["WZ lagragian", "Section",
+ CellChangeTimes->{{3.6742083395732327`*^9, 3.674208340513473*^9}, {
+  3.6744825549647627`*^9, 3.67448255829958*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"lagrWZ", "[", "coord_List", "]"}], "[", 
+   RowBox[{"gauge_", ",", "potentials_List"}], "]"}], ":=", " ", 
+  RowBox[{"Module", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"dim", ",", "temp"}], "}"}], ",", "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"dim", "=", 
+      RowBox[{"Length", "@", "coord"}]}], ";", "\[IndentingNewLine]", 
+     RowBox[{"temp", "=", 
+      RowBox[{
+       RowBox[{"Sum", "[", 
+        RowBox[{
+         RowBox[{
+          FractionBox["1", 
+           RowBox[{"n", "!"}]], 
+          RowBox[{"wedgePower", "[", 
+           RowBox[{"gauge", ",", "n"}], "]"}]}], ",", 
+         RowBox[{"{", 
+          RowBox[{"n", ",", "0", ",", 
+           RowBox[{"dim", "+", "1"}]}], "}"}]}], "]"}], "\[Wedge]", 
+       RowBox[{"Plus", "@@", "potentials"}]}]}], ";", "\[IndentingNewLine]", 
+     RowBox[{"projectDim", "[", 
+      RowBox[{"temp", ",", "dim"}], "]"}]}]}], "\[IndentingNewLine]", 
+   "]"}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.674208347753701*^9, 3.6742084091795893`*^9}, {
+   3.674208765992609*^9, 3.6742088074731283`*^9}, {3.6742090081488037`*^9, 
+   3.6742090710163097`*^9}, {3.674210014211891*^9, 3.6742100421523333`*^9}, {
+   3.674210179371758*^9, 3.674210183556776*^9}, {3.674210471319714*^9, 
+   3.67421049760635*^9}, {3.6742105347808104`*^9, 3.674210536067872*^9}, {
+   3.6742105782247*^9, 3.674210578520733*^9}, {3.6742110460391617`*^9, 
+   3.674211084720409*^9}, {3.674211134690937*^9, 3.674211134999323*^9}, {
+   3.674211174277224*^9, 3.674211181097577*^9}, {3.674211627241453*^9, 
+   3.6742116286937857`*^9}, {3.674279099117152*^9, 3.6742790994793053`*^9}, {
+   3.67427921576118*^9, 3.674279233591516*^9}, {3.674279274356737*^9, 
+   3.674279274546995*^9}, 3.674482544109782*^9}]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -338,11 +386,33 @@ Cell["Kappa projector, initialization cells", "Section",
 
 Cell[CellGroupData[{
 
-Cell["wedgePower, wedgeForm, formConstruct", "Subsection",
+Cell["partition, wedgePower, wedgeForm, formConstruct", "Subsection",
  CellChangeTimes->{{3.6593405072380667`*^9, 3.659340519987955*^9}, {
-  3.6593406913639708`*^9, 3.659340698733797*^9}}],
+  3.6593406913639708`*^9, 3.659340698733797*^9}, {3.672565374508224*^9, 
+  3.672565377627672*^9}}],
 
 Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"partition", "[", 
+    RowBox[{"dim_", ",", "n_"}], "]"}], ":=", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"perm", ",", "ans"}], "}"}], ",", 
+     RowBox[{
+      RowBox[{"perm", "=", 
+       RowBox[{"Sort", "/@", 
+        RowBox[{"Permutations", "[", 
+         RowBox[{
+          RowBox[{"Range", "[", "dim", "]"}], ",", 
+          RowBox[{"{", "n", "}"}]}], "]"}]}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"ans", "=", 
+       RowBox[{"DeleteDuplicates", "@", "perm"}]}]}]}], "]"}]}], 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{"It", "'"}], "s", " ", "inefficient"}], "*)"}], "\n", 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"wedgePower", "[", 
    RowBox[{"G_", ",", 
@@ -356,7 +426,7 @@ Cell[BoxData[{
  RowBox[{
   RowBox[{
    RowBox[{"wedgePower", "[", 
-    RowBox[{"G_", ",", "0"}], "]"}], ":=", "1"}], "\[IndentingNewLine]", 
+    RowBox[{"G_", ",", "0"}], "]"}], ":=", "1"}], "\n", 
   RowBox[{"(*", 
    RowBox[{"Alternative", " ", 
     RowBox[{"definition", ":"}]}], "*)"}], "\[IndentingNewLine]", 
@@ -370,7 +440,8 @@ Cell[BoxData[{
      RowBox[{"Table", "[", 
       RowBox[{"G", ",", 
        RowBox[{"{", 
-        RowBox[{"i", ",", "1", ",", "n"}], "}"}]}], "]"}]}]}], "*)"}]}], "\n", 
+        RowBox[{"i", ",", "1", ",", "n"}], "}"}]}], "]"}]}]}], 
+   "*)"}]}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
    RowBox[{"wedgeForm", "[", "coord_List", "]"}], "[", 
@@ -418,7 +489,7 @@ with wedge products, e.g. f d[x]\[Wedge]d[y] + g d[x]\[Wedge]d[z] \>\""}],
  RowBox[{
   RowBox[{
    RowBox[{"formConstruct", "::", "usage"}], "=", 
-   "\"\<formConstract[coord][name, dim] constructs a form of given name and \
+   "\"\<formConstruct[coord][name, dim] constructs a form of given name and \
 dimension from partitions of the dimension of the manifold specified by \
 coord. It uses wedgeForm[]. \>\""}], ";"}]}], "Input",
  InitializationCell->True,
@@ -428,7 +499,8 @@ coord. It uses wedgeForm[]. \>\""}], ";"}]}], "Input",
    3.659339475383184*^9}, {3.6593397378678503`*^9, 3.659339768134275*^9}, {
    3.659339848131115*^9, 3.659339935122316*^9}, {3.6593401654252167`*^9, 
    3.659340168214876*^9}, {3.659340242123918*^9, 3.659340292023069*^9}, {
-   3.6593403985902576`*^9, 3.6593404579331408`*^9}, 3.659340497168387*^9}]
+   3.6593403985902576`*^9, 3.6593404579331408`*^9}, 3.659340497168387*^9, {
+   3.672565359840228*^9, 3.672565372118805*^9}, 3.674208516756804*^9}]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -542,6 +614,17 @@ expr.\>\""}], ";"}], "\[IndentingNewLine]"}], "\[IndentingNewLine]",
     RowBox[{
      RowBox[{"dim", "=", 
       RowBox[{"Length", "@", "coord"}]}], ";", "\[IndentingNewLine]", 
+     RowBox[{"(*", " ", 
+      RowBox[{
+       RowBox[{"Brute", " ", "force", " ", 
+        RowBox[{"approach", ":", " ", 
+         RowBox[{"build", " ", "the", " ", "most", " ", "general", " ", 
+          SubscriptBox["\[Gamma]", 
+           RowBox[{"(", "n", ")"}]]}]}]}], ",", " ", 
+       RowBox[{"contract", " ", "it", " ", "with", " ", 
+        SuperscriptBox["\[ExponentialE]", "F"], " ", "and", " ", "project", 
+        " ", "to", " ", "the", " ", "dimension", " ", "we", " ", "want"}]}], 
+      " ", "*)"}], "\[IndentingNewLine]", 
      RowBox[{
       RowBox[{"\[Gamma]Form", "[", "n_", "]"}], ":=", 
       RowBox[{
@@ -574,7 +657,7 @@ expr.\>\""}], ";"}], "\[IndentingNewLine]"}], "\[IndentingNewLine]",
              RowBox[{"n", "/", "2"}], ",", "2"}], "]"}]]}], ",", 
          RowBox[{"{", 
           RowBox[{"n", ",", "0", ",", "dim", ",", "2"}], "}"}]}], "]"}]}]}], 
-     ";", "\[IndentingNewLine]", 
+     ";", " ", "\[IndentingNewLine]", 
      RowBox[{
       RowBox[{
        RowBox[{
@@ -622,14 +705,18 @@ spinor. See Skenderis-Taylor hep-th/0204054.\>\""}], ";"}]}], "Input",
    3.6593403985902576`*^9, 3.6593404579331408`*^9}, 3.659340497168387*^9, {
    3.65934052973847*^9, 3.659340536709498*^9}, {3.6593411065323553`*^9, 
    3.659341364543026*^9}, {3.659452305065689*^9, 3.65945232863977*^9}, {
-   3.6664482483578444`*^9, 3.6664482591995564`*^9}}],
+   3.6664485124199038`*^9, 3.666448517665609*^9}, {3.674214218274802*^9, 
+   3.674214276145833*^9}, {3.6742790458200912`*^9, 3.6742790466005898`*^9}, {
+   3.678515299888339*^9, 3.678515370883863*^9}, {3.678516270983152*^9, 
+   3.678516271562272*^9}}],
 
 Cell[BoxData[
  RowBox[{"\[IndentingNewLine]", 
   RowBox[{
    RowBox[{
     RowBox[{
-     RowBox[{"\[Gamma]Components", "[", 
+     RowBox[{
+      RowBox[{"\[Gamma]Components", "[", "signature_", "]"}], "[", 
       RowBox[{
       "vierbein_", ",", "coord_", ",", "inducedCoord_", ",", "pullback_"}], 
       "]"}], "[", "i__", "]"}], ":=", 
@@ -645,25 +732,13 @@ Cell[BoxData[
         RowBox[{
          RowBox[{
           RowBox[{
-           RowBox[{
-            RowBox[{
-             FractionBox["1", 
-              RowBox[{"n", "!"}]], 
-             RowBox[{
-              SubscriptBox["\[PartialD]", 
-               SubscriptBox["a", "1"]], 
-              SuperscriptBox["X", 
-               SubscriptBox["\[Mu]", "1"]]}]}], "..."}], 
-           RowBox[{
-            SubscriptBox["\[PartialD]", 
-             SubscriptBox["a", "n"]], 
-            SuperscriptBox["X", 
-             SubscriptBox["\[Mu]", "n"]]}], " ", 
+           FractionBox["1", 
+            RowBox[{"n", "!"}]], 
            SubscriptBox["\[Gamma]", 
-            RowBox[{
+            RowBox[{"{", 
              RowBox[{
-              SubscriptBox["\[Mu]", "1"], "..."}], 
-             SubscriptBox["\[Mu]", "n"]}]], 
+              SubscriptBox["a", "1"], ",", "...", ",", 
+              SubscriptBox["a", "n"]}], "}"}]], 
            RowBox[{
             SuperscriptBox["d\[Xi]", 
              SubscriptBox["a", "1"]], "\[Wedge]"}]}], "..."}], "\[Wedge]", 
@@ -687,33 +762,43 @@ Cell[BoxData[
            RowBox[{"[", "#", "]"}], "]"}], "&"}], "/@", 
          RowBox[{"{", "i", "}"}]}]}], ";", "\[IndentingNewLine]", 
        RowBox[{
-        RowBox[{"ncContract", "[", "\[Gamma]", "]"}], "@@", 
-        "selectComponents"}]}]}], "\[IndentingNewLine]", "]"}]}], 
-   "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"mergeArguments", "[", "\[Gamma]", "]"}], "@@", 
+         "selectComponents"}], "/.", 
+        RowBox[{"\[Gamma]", "\[Rule]", 
+         RowBox[{"antisym", "[", "\[Gamma]", "]"}]}]}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
    RowBox[{
     RowBox[{
      RowBox[{
-      RowBox[{"\[Gamma]Components", "[", 
+      RowBox[{
+       RowBox[{"\[Gamma]Components", "[", "signature_", "]"}], "[", 
        RowBox[{
        "vierbein_", ",", "coord_", ",", "inducedCoord_", ",", "pullback_"}], 
        "]"}], "[", "i_", "]"}], ":=", "1"}], ";"}], "\[IndentingNewLine]", 
    RowBox[{
     RowBox[{
      RowBox[{"\[Gamma]Components", "::", "usage"}], "=", 
-     "\"\<\[Gamma]Components[vielb, coord, inducedCoord, pullback][i__] gives \
-the components of \!\(\*SubscriptBox[\(\[Gamma]\), \((n)\)]\) = \
-\!\(\*FractionBox[\(1\), \(n!\)]\)\!\(\*SubscriptBox[\(\[PartialD]\), \
-SubscriptBox[\(a\), \(1\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\
-\), \(1\)]]\)...\!\(\*SubscriptBox[\(\[PartialD]\), SubscriptBox[\(a\), \
-\(n\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\), \(n\)]]\) \
+     "\"\<\[Gamma]Components[signature][vielb, coord, inducedCoord, \
+pullback][i__] returns \!\(\*SubscriptBox[\(\[Gamma]\), \({\*SubscriptBox[\(a\
+\), \(1\)],  ... , \*SubscriptBox[\(a\), \(n\)]}\)]\) = \!\(\*SubscriptBox[\(\
+\[PartialD]\), SubscriptBox[\(a\), \(1\)]]\)\!\(\*SuperscriptBox[\(X\), \
+SubscriptBox[\(\[Mu]\), \(1\)]]\)...\!\(\*SubscriptBox[\(\[PartialD]\), \
+SubscriptBox[\(a\), \(n\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\
+\), \(n\)]]\) \!\(\*SubscriptBox[\(\[Gamma]\), \(\(\*SubscriptBox[\(\[Mu]\), \
+\(1\)] ... \) \*SubscriptBox[\(\[Mu]\), \(n\)]\)]\), where \
 \!\(\*SubscriptBox[\(\[Gamma]\), \(\(\*SubscriptBox[\(\[Mu]\), \(1\)] ... \) \
-\*SubscriptBox[\(\[Mu]\), \(n\)]\)]\)\!\(\*SuperscriptBox[\(d\[Xi]\), \
+\*SubscriptBox[\(\[Mu]\), \(n\)]\)]\) are curved space gamma matrices. \n\!\(\
+\*SubscriptBox[\(\[Gamma]\), \((n)\)]\) = \!\(\*FractionBox[\(1\), \
+\(n!\)]\)\!\(\*SubscriptBox[\(\[Gamma]\), \({\*SubscriptBox[\(a\), \(1\)],  \
+... , \*SubscriptBox[\(a\), \(n\)]}\)]\)\!\(\*SuperscriptBox[\(d\[Xi]\), \
 SubscriptBox[\(a\), \(1\)]]\)\[Wedge]...\[Wedge]\!\(\*SuperscriptBox[\(d\[Xi]\
 \), SubscriptBox[\(a\), \(n\)]]\).\>\""}], ";"}], "\[IndentingNewLine]", 
    "\[IndentingNewLine]", 
    RowBox[{
     RowBox[{
-     RowBox[{"\[Gamma]ComponentsLocal", "[", 
+     RowBox[{
+      RowBox[{"\[Gamma]ComponentsLocal", "[", "signature_", "]"}], "[", 
       RowBox[{
       "vierbein_", ",", "coord_", ",", "inducedCoord_", ",", "pullback_"}], 
       "]"}], "[", "i__", "]"}], ":=", 
@@ -786,30 +871,39 @@ SubscriptBox[\(a\), \(1\)]]\)\[Wedge]...\[Wedge]\!\(\*SuperscriptBox[\(d\[Xi]\
            RowBox[{"[", "#", "]"}], "]"}], "&"}], "/@", 
          RowBox[{"{", "i", "}"}]}]}], ";", "\[IndentingNewLine]", 
        RowBox[{
-        RowBox[{"ncContract", "[", "\[CapitalGamma]", "]"}], "@@", 
-        "selectComponents"}]}]}], "\[IndentingNewLine]", "]"}]}], 
-   "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"mergeArguments", "[", "\[CapitalGamma]", "]"}], "@@", 
+         "selectComponents"}], "/.", 
+        RowBox[{"\[CapitalGamma]", "\[Rule]", 
+         RowBox[{"antisym", "[", "\[CapitalGamma]", "]"}]}]}]}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
    RowBox[{
     RowBox[{
      RowBox[{
-      RowBox[{"\[Gamma]ComponentsLocal", "[", 
+      RowBox[{
+       RowBox[{"\[Gamma]ComponentsLocal", "[", "signature_", "]"}], "[", 
        RowBox[{
        "vierbein_", ",", "coord_", ",", "inducedCoord_", ",", "pullback_"}], 
        "]"}], "[", "i_", "]"}], ":=", "1"}], ";"}], "\[IndentingNewLine]", 
    RowBox[{
     RowBox[{
      RowBox[{"\[Gamma]ComponentsLocal", "::", "usage"}], "=", 
-     "\"\<\[Gamma]ComponentsLocal[vielb, coord, inducedCoord, pullback][i__] \
-gives the components of \!\(\*SubscriptBox[\(\[Gamma]\), \((n)\)]\) = \
-\!\(\*FractionBox[\(1\), \(n!\)]\)\!\(\*SubscriptBox[\(\[PartialD]\), \
-SubscriptBox[\(a\), \(1\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\
-\), \(1\)]]\)...\!\(\*SubscriptBox[\(\[PartialD]\), SubscriptBox[\(a\), \
-\(n\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\), \(n\)]]\) \
-\!\(\*SubsuperscriptBox[\(E\), SubscriptBox[\(\[Mu]\), \(1\)], \
+     "\"\<\[Gamma]ComponentsLocal[signature][vielb, coord, inducedCoord, \
+pullback][i__] returns \!\(\*SubscriptBox[\(\[Gamma]\), \({\*SubscriptBox[\(a\
+\), \(1\)],  ... , \*SubscriptBox[\(a\), \(n\)]}\)]\) = \!\(\*SubscriptBox[\(\
+\[PartialD]\), SubscriptBox[\(a\), \(1\)]]\)\!\(\*SuperscriptBox[\(X\), \
+SubscriptBox[\(\[Mu]\), \(1\)]]\)...\!\(\*SubscriptBox[\(\[PartialD]\), \
+SubscriptBox[\(a\), \(n\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\
+\), \(n\)]]\) \!\(\*SubsuperscriptBox[\(E\), SubscriptBox[\(\[Mu]\), \(1\)], \
 SubscriptBox[\(M\), \(1\)]]\)...\!\(\*SubsuperscriptBox[\(E\), \
 SubscriptBox[\(\[Mu]\), \(n\)], SubscriptBox[\(M\), \(n\)]]\) \
 \!\(\*SubscriptBox[\(\[CapitalGamma]\), \(\(\*SubscriptBox[\(M\), \(1\)] ... \
-\) \*SubscriptBox[\(M\), \(n\)]\)]\)\!\(\*SuperscriptBox[\(d\[Xi]\), \
+\) \*SubscriptBox[\(M\), \(n\)]\)]\), where \!\(\*SubscriptBox[\(\
+\[CapitalGamma]\), \(\(\*SubscriptBox[\(M\), \(1\)] ... \) \*SubscriptBox[\(M\
+\), \(n\)]\)]\) are flat space gamma matrices. \n\
+\!\(\*SubscriptBox[\(\[Gamma]\), \((n)\)]\) = \!\(\*FractionBox[\(1\), \
+\(n!\)]\)\!\(\*SubscriptBox[\(\[Gamma]\), \({\*SubscriptBox[\(a\), \(1\)],  \
+... , \*SubscriptBox[\(a\), \(n\)]}\)]\)\!\(\*SuperscriptBox[\(d\[Xi]\), \
 SubscriptBox[\(a\), \(1\)]]\)\[Wedge]...\[Wedge]\!\(\*SuperscriptBox[\(d\[Xi]\
 \), SubscriptBox[\(a\), \(n\)]]\).\>\""}], ";"}]}]}]], "Input",
  InitializationCell->True,
@@ -858,7 +952,16 @@ SubscriptBox[\(a\), \(1\)]]\)\[Wedge]...\[Wedge]\!\(\*SuperscriptBox[\(d\[Xi]\
    3.6592639136476383`*^9, 3.65926393040403*^9}, {3.659263971927462*^9, 
    3.659263989886785*^9}, {3.659264031326313*^9, 3.659264171201727*^9}, {
    3.659340196255884*^9, 3.6593402288364983`*^9}, {3.65934040675484*^9, 
-   3.659340433830635*^9}, 3.659340476510137*^9}]
+   3.659340433830635*^9}, 3.659340476510137*^9, {3.672565595364896*^9, 
+   3.6725655970400887`*^9}, 3.672565630334944*^9, {3.672565744747676*^9, 
+   3.6725657513058777`*^9}, {3.6725658072637367`*^9, 3.6725658615401*^9}, {
+   3.672565893339313*^9, 3.672565905684329*^9}, {3.67256595852199*^9, 
+   3.672565994975183*^9}, {3.672571096263372*^9, 3.672571097191978*^9}, {
+   3.672571128256153*^9, 3.6725711355528297`*^9}, 3.6725711894687653`*^9, {
+   3.672574265078825*^9, 3.672574320163651*^9}, {3.672574354212772*^9, 
+   3.672574357481428*^9}, {3.678515397415205*^9, 3.678515462430457*^9}, {
+   3.678515497434326*^9, 3.6785155085484343`*^9}, {3.6785156159465218`*^9, 
+   3.6785156406047497`*^9}, {3.678519138535821*^9, 3.6785192914975147`*^9}}]
 }, Closed]]
 }, Open  ]]
 }, Open  ]]
@@ -868,7 +971,8 @@ WindowSize->{1680, 1026},
 WindowMargins->{{0, Automatic}, {Automatic, 0}},
 Magnification:>1.5 Inherited,
 FrontEndVersion->"10.0 for Linux x86 (64-bit) (December 4, 2014)",
-StyleDefinitions->"Default.nb"
+StyleDefinitions->FrontEnd`FileName[{"Report"}, "StandardReport.nb", 
+  CharacterEncoding -> "UTF-8"]
 ]
 (* End of Notebook Content *)
 
@@ -882,40 +986,45 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 165, 2, 139, "Title"],
+Cell[580, 22, 165, 2, 136, "Title"],
 Cell[748, 26, 107, 1, 49, "Text"],
-Cell[858, 29, 513, 11, 78, "Input"],
-Cell[1374, 42, 1652, 28, 133, "Input",
+Cell[858, 29, 513, 11, 59, "Input"],
+Cell[1374, 42, 1669, 28, 118, "Input",
  InitializationCell->True],
 Cell[CellGroupData[{
-Cell[3051, 74, 148, 2, 96, "Section"],
+Cell[3068, 74, 148, 2, 99, "Section"],
 Cell[CellGroupData[{
-Cell[3224, 80, 259, 3, 19381, "Subsection"],
-Cell[3486, 85, 100, 1, 21079, "Text"],
-Cell[3589, 88, 2882, 91, 232822, "Text"]
+Cell[3241, 80, 259, 3, 49, "Subsection"],
+Cell[3503, 85, 100, 1, 49, "Text"],
+Cell[3606, 88, 2882, 91, 532, "Text"]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[6508, 184, 310, 4, 15237, "Subsection"],
-Cell[6821, 190, 4491, 137, 96504, "Text"]
-}, Open  ]]
+Cell[6525, 184, 310, 4, 47, "Subsection"],
+Cell[6838, 190, 4491, 137, 331, "Text"]
+}, Closed]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[11361, 333, 221, 3, 73, "Section"],
-Cell[CellGroupData[{
-Cell[11607, 340, 177, 2, 67, "Subsection"],
-Cell[11787, 344, 3334, 86, 3870, "Input",
+Cell[11378, 333, 149, 2, 76, "Section"],
+Cell[11530, 337, 1797, 39, 375, "Input",
  InitializationCell->True]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[15158, 435, 424, 10, 53, "Subsection"],
-Cell[15585, 447, 568, 14, 526, "Input",
+Cell[13364, 381, 221, 3, 76, "Section"],
+Cell[CellGroupData[{
+Cell[13610, 388, 237, 3, 49, "Subsection"],
+Cell[13850, 393, 4113, 109, 960, "Input",
  InitializationCell->True]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[16190, 466, 223, 4, 53, "Subsection"],
-Cell[16416, 472, 6182, 152, 906, "Input",
+Cell[18000, 507, 424, 10, 47, "Subsection"],
+Cell[18427, 519, 568, 14, 526, "Input",
+ InitializationCell->True]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[19032, 538, 223, 4, 47, "Subsection"],
+Cell[19258, 544, 6926, 166, 980, "Input",
  InitializationCell->True],
-Cell[22601, 626, 11014, 234, 962, "Input",
+Cell[26187, 712, 12486, 251, 1057, "Input",
  InitializationCell->True]
 }, Closed]]
 }, Open  ]]
@@ -924,4 +1033,3 @@ Cell[22601, 626, 11014, 234, 962, "Input",
 ]
 *)
 
-(* End of internal cache information *)

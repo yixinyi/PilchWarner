@@ -21,8 +21,18 @@
 
 AppendTo[$Path,ToFileName[{NotebookDirectory[]}]];
 <<matrixEDC.m
-<<commons.m
-<<algebraDirac.m
+<<algebraDirac`
+
+
+lagrWZ[coord_List][gauge_,potentials_List]:= Module[{dim,temp},
+dim=Length@coord;
+temp=Sum[1/n! wedgePower[gauge,n],{n,0,dim+1}]\[Wedge]Plus@@potentials;
+projectDim[temp,dim]
+]
+
+
+partition[dim_,n_]:=Module[{perm,ans},perm=Sort/@Permutations[Range[dim],{n}];
+ans=DeleteDuplicates@perm](*It's inefficient*)
 
 
 wedgePower[G_,n_/;n>=1]:=wedgePower[G,n-1]\[Wedge]G
@@ -38,7 +48,7 @@ dim=Length@coord;
 components=partition[dim,n];
 wedgeForm[coord][\[Gamma]@@@components,components]
 ]
-formConstruct::usage="formConstract[coord][name, dim] constructs a form of given name and dimension from partitions of the dimension of the manifold specified by coord. It uses wedgeForm[]. ";
+formConstruct::usage="formConstruct[coord][name, dim] constructs a form of given name and dimension from partitions of the dimension of the manifold specified by coord. It uses wedgeForm[]. ";
 
 
 Clear[\[Gamma],\[CapitalGamma],\[ScriptCapitalK]];
@@ -62,9 +72,10 @@ projectDim::usage="projectDim[expr, dim] selects only the term with given dim fr
 
 dBraneProj[coord_List][Fcoef_List, Fbasis_List]:=Module[{dim,Fform, \[Gamma]Form, expr,\[Xi]},
 dim=Length@coord;
+(* Brute force approach: build the most general Subscript[\[Gamma], (n)], contract it with \[ExponentialE]^F and project to the dimension we want *)
 \[Gamma]Form[n_]:=formConstruct[coord][\[Gamma],n];
 Fform=wedgeForm[coord][Fcoef, Fbasis];
-expr=Sum[1/n! wedgePower[Fform,n],{n,0,dim+1}]\[Wedge]Sum[\[Gamma]Form[n]\[ScriptCapitalK]^Mod[n/2,2],{n,0,dim,2}];
+expr=Sum[1/n! wedgePower[Fform,n],{n,0,dim+1}]\[Wedge]Sum[\[Gamma]Form[n]\[ScriptCapitalK]^Mod[n/2,2],{n,0,dim,2}]; 
 projectDim[expr,dim]/.listsToRule[d[coord],d/@Array[\[Xi],dim]]/.Wedge[x__]-> 1/.\[CapitalGamma]-> antisym[\[CapitalGamma]]
 (* The names of the coordinates are replaced to an ordered array, in order to sort the basis. Then, I make the basis disappear in the last replacement rule *)
 ]
@@ -72,25 +83,18 @@ dBraneProj::usage="dBraneProj[coord][Fcoef, Fbasis] returns the STRIPPED, i.e. n
 
 
 
-\[Gamma]Components[vierbein_,coord_,inducedCoord_,pullback_][i__]:=Module[{l,list,selectComponents},
-(*Subscript[\[Gamma], (n)] = 1/n!\!\(
-\*SubscriptBox[\(\[PartialD]\), 
-SubscriptBox[\(a\), \(1\)]]
-\*SuperscriptBox[\(X\), 
-SubscriptBox[\(\[Mu]\), \(1\)]]\)...\!\(
-\*SubscriptBox[\(\[PartialD]\), 
-SubscriptBox[\(a\), \(n\)]]
-\*SuperscriptBox[\(X\), 
-SubscriptBox[\(\[Mu]\), \(n\)]]\) Subscript[\[Gamma], Subscript[\[Mu], 1]...Subscript[\[Mu], n]](d\[Xi]^Subscript[a, 1])\[Wedge]...\[Wedge]d\[Xi]^Subscript[a, n]*)
+\[Gamma]Components[signature_][vierbein_,coord_,inducedCoord_,pullback_][i__]:=Module[{l,list,selectComponents},
+(*Subscript[\[Gamma], (n)] = 1/n!Subscript[\[Gamma], {Subscript[a, 1],...,Subscript[a, n]}](d\[Xi]^Subscript[a, 1])\[Wedge]...\[Wedge]d\[Xi]^Subscript[a, n]*)
 l=Length@coord;
 list=Transpose[Grad[pullback,inducedCoord]].Array[\[Gamma],l];
 selectComponents=list[[#]]&/@{i};
-ncContract[\[Gamma]]@@selectComponents
+mergeArguments[\[Gamma]]@@selectComponents/.\[Gamma]->antisym[\[Gamma]]
 ]
-\[Gamma]Components[vierbein_,coord_,inducedCoord_,pullback_][i_]:=1;
-\[Gamma]Components::usage="\[Gamma]Components[vielb, coord, inducedCoord, pullback][i__] gives the components of \!\(\*SubscriptBox[\(\[Gamma]\), \((n)\)]\) = \!\(\*FractionBox[\(1\), \(n!\)]\)\!\(\*SubscriptBox[\(\[PartialD]\), SubscriptBox[\(a\), \(1\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\), \(1\)]]\)...\!\(\*SubscriptBox[\(\[PartialD]\), SubscriptBox[\(a\), \(n\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\), \(n\)]]\) \!\(\*SubscriptBox[\(\[Gamma]\), \(\(\*SubscriptBox[\(\[Mu]\), \(1\)] ... \) \*SubscriptBox[\(\[Mu]\), \(n\)]\)]\)\!\(\*SuperscriptBox[\(d\[Xi]\), SubscriptBox[\(a\), \(1\)]]\)\[Wedge]...\[Wedge]\!\(\*SuperscriptBox[\(d\[Xi]\), SubscriptBox[\(a\), \(n\)]]\).";
+\[Gamma]Components[signature_][vierbein_,coord_,inducedCoord_,pullback_][i_]:=1;
+\[Gamma]Components::usage="\[Gamma]Components[signature][vielb, coord, inducedCoord, pullback][i__] returns \!\(\*SubscriptBox[\(\[Gamma]\), \({\*SubscriptBox[\(a\), \(1\)],  ... , \*SubscriptBox[\(a\), \(n\)]}\)]\) = \!\(\*SubscriptBox[\(\[PartialD]\), SubscriptBox[\(a\), \(1\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\), \(1\)]]\)...\!\(\*SubscriptBox[\(\[PartialD]\), SubscriptBox[\(a\), \(n\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\), \(n\)]]\) \!\(\*SubscriptBox[\(\[Gamma]\), \(\(\*SubscriptBox[\(\[Mu]\), \(1\)] ... \) \*SubscriptBox[\(\[Mu]\), \(n\)]\)]\), where \!\(\*SubscriptBox[\(\[Gamma]\), \(\(\*SubscriptBox[\(\[Mu]\), \(1\)] ... \) \*SubscriptBox[\(\[Mu]\), \(n\)]\)]\) are curved space gamma matrices. 
+\!\(\*SubscriptBox[\(\[Gamma]\), \((n)\)]\) = \!\(\*FractionBox[\(1\), \(n!\)]\)\!\(\*SubscriptBox[\(\[Gamma]\), \({\*SubscriptBox[\(a\), \(1\)],  ... , \*SubscriptBox[\(a\), \(n\)]}\)]\)\!\(\*SuperscriptBox[\(d\[Xi]\), SubscriptBox[\(a\), \(1\)]]\)\[Wedge]...\[Wedge]\!\(\*SuperscriptBox[\(d\[Xi]\), SubscriptBox[\(a\), \(n\)]]\).";
 
-\[Gamma]ComponentsLocal[vierbein_,coord_,inducedCoord_,pullback_][i__]:=Module[{l,list,selectComponents,pullbackRule},
+\[Gamma]ComponentsLocal[signature_][vierbein_,coord_,inducedCoord_,pullback_][i__]:=Module[{l,list,selectComponents,pullbackRule},
 (*Subscript[\[Gamma], (n)] = 1/n!\!\(
 \*SubscriptBox[\(\[PartialD]\), 
 SubscriptBox[\(a\), \(1\)]]
@@ -104,7 +108,8 @@ l=Length@coord;
 pullbackRule=listsToRule[coord,pullback];
 list=Transpose[Grad[pullback,inducedCoord]].(vierbein/.pullbackRule).Array[\[CapitalGamma],l];
 selectComponents=list[[#]]&/@{i};
-ncContract[\[CapitalGamma]]@@selectComponents
+mergeArguments[\[CapitalGamma]]@@selectComponents/.\[CapitalGamma]->antisym[\[CapitalGamma]]
 ]
-\[Gamma]ComponentsLocal[vierbein_,coord_,inducedCoord_,pullback_][i_]:=1;
-\[Gamma]ComponentsLocal::usage="\[Gamma]ComponentsLocal[vielb, coord, inducedCoord, pullback][i__] gives the components of \!\(\*SubscriptBox[\(\[Gamma]\), \((n)\)]\) = \!\(\*FractionBox[\(1\), \(n!\)]\)\!\(\*SubscriptBox[\(\[PartialD]\), SubscriptBox[\(a\), \(1\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\), \(1\)]]\)...\!\(\*SubscriptBox[\(\[PartialD]\), SubscriptBox[\(a\), \(n\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\), \(n\)]]\) \!\(\*SubsuperscriptBox[\(E\), SubscriptBox[\(\[Mu]\), \(1\)], SubscriptBox[\(M\), \(1\)]]\)...\!\(\*SubsuperscriptBox[\(E\), SubscriptBox[\(\[Mu]\), \(n\)], SubscriptBox[\(M\), \(n\)]]\) \!\(\*SubscriptBox[\(\[CapitalGamma]\), \(\(\*SubscriptBox[\(M\), \(1\)] ... \) \*SubscriptBox[\(M\), \(n\)]\)]\)\!\(\*SuperscriptBox[\(d\[Xi]\), SubscriptBox[\(a\), \(1\)]]\)\[Wedge]...\[Wedge]\!\(\*SuperscriptBox[\(d\[Xi]\), SubscriptBox[\(a\), \(n\)]]\).";
+\[Gamma]ComponentsLocal[signature_][vierbein_,coord_,inducedCoord_,pullback_][i_]:=1;
+\[Gamma]ComponentsLocal::usage="\[Gamma]ComponentsLocal[signature][vielb, coord, inducedCoord, pullback][i__] returns \!\(\*SubscriptBox[\(\[Gamma]\), \({\*SubscriptBox[\(a\), \(1\)],  ... , \*SubscriptBox[\(a\), \(n\)]}\)]\) = \!\(\*SubscriptBox[\(\[PartialD]\), SubscriptBox[\(a\), \(1\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\), \(1\)]]\)...\!\(\*SubscriptBox[\(\[PartialD]\), SubscriptBox[\(a\), \(n\)]]\)\!\(\*SuperscriptBox[\(X\), SubscriptBox[\(\[Mu]\), \(n\)]]\) \!\(\*SubsuperscriptBox[\(E\), SubscriptBox[\(\[Mu]\), \(1\)], SubscriptBox[\(M\), \(1\)]]\)...\!\(\*SubsuperscriptBox[\(E\), SubscriptBox[\(\[Mu]\), \(n\)], SubscriptBox[\(M\), \(n\)]]\) \!\(\*SubscriptBox[\(\[CapitalGamma]\), \(\(\*SubscriptBox[\(M\), \(1\)] ... \) \*SubscriptBox[\(M\), \(n\)]\)]\), where \!\(\*SubscriptBox[\(\[CapitalGamma]\), \(\(\*SubscriptBox[\(M\), \(1\)] ... \) \*SubscriptBox[\(M\), \(n\)]\)]\) are flat space gamma matrices. 
+\!\(\*SubscriptBox[\(\[Gamma]\), \((n)\)]\) = \!\(\*FractionBox[\(1\), \(n!\)]\)\!\(\*SubscriptBox[\(\[Gamma]\), \({\*SubscriptBox[\(a\), \(1\)],  ... , \*SubscriptBox[\(a\), \(n\)]}\)]\)\!\(\*SuperscriptBox[\(d\[Xi]\), SubscriptBox[\(a\), \(1\)]]\)\[Wedge]...\[Wedge]\!\(\*SuperscriptBox[\(d\[Xi]\), SubscriptBox[\(a\), \(n\)]]\).";

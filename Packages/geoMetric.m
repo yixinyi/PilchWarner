@@ -19,9 +19,28 @@
 
 
 
-AppendTo[$Path,ToFileName[{NotebookDirectory[]}]];
-<<commons.m
-<<algebraDirac.m
+BeginPackage["geoMetric`"]
+
+metricMink
+metric
+induced
+hodgeDual
+
+christoffelS
+spinConnection
+riemannT
+ricciT
+ricciScalar
+
+poincarePatch
+horosphericAdS
+
+spherical
+volSph
+surfaceSph
+
+Begin["`Private`"]
+Needs["commons`"]
 
 
 metricMink[sign_Integer/;sign==1||sign==-1][dim_]:=-sign DiagonalMatrix[Prepend[ConstantArray[1,dim-1],-1]]
@@ -65,7 +84,7 @@ Table[
 array[[\[Lambda],\[Mu],\[Nu]]]=Sum[1/2 invMetric[[\[Lambda],\[Rho]]](D[G[[\[Rho],\[Nu]]],X[[\[Mu]]]]+D[G[[\[Rho],\[Mu]]],X[[\[Nu]]]]-D[G[[\[Mu],\[Nu]]],X[[\[Rho]]]]),{\[Rho],1,dim}];
 (* Use the symmetric property of \[Mu] and \[Nu] indices *)
 array[[\[Lambda],\[Nu],\[Mu]]]=array[[\[Lambda],\[Mu],\[Nu]]],
-{\[Lambda],1,dim},{\[Mu],1,dim},{\[Nu],\[Mu],dim}]//FullSimplify;
+{\[Lambda],1,dim},{\[Mu],1,dim},{\[Nu],\[Mu],dim}]//Simplify;
 array
 ]
 christoffelS::usage="christoffelS[coord, metric]. Notation Christoffel Symbols:\!\(\*FormBox[\(TraditionalForm\`\(\(\\\ \)\(\*SubscriptBox[SuperscriptBox[\(\[CapitalGamma]\), \(1\)], \(23\)] = \[CapitalGamma][\([1, 2, 3]\)]\)\)\),
@@ -81,11 +100,9 @@ Table[
 Sum[ee[[a,\[Nu]]]iee[[\[Lambda],b]]\[CapitalGamma][[\[Nu],\[Mu],\[Lambda]]],{\[Lambda],1,dim},{\[Nu],1,dim}]
 -Sum[iee[[\[Lambda],b]]D[ee[[a,\[Lambda]]],X[[\[Mu]]]],{\[Lambda],1,dim}],{\[Mu],1,dim},
 {a,1,dim},{b,1,dim}
-]//FullSimplify
+]//Simplify
 ]
-spinConnection::usage="spinConnection[coord, metric, vierbein]'s definition follows Sean Carroll's book (eq. J21). It uses christoffelS[] function.
-Notation: \!\(\*FormBox[\(TraditionalForm\`\(\(\\\ \)\(\*SubsuperscriptBox[\(\[CapitalOmega]\), \(\[Mu]\\\ b\), \(a\)] = \[CapitalOmega][\([\[Mu], a, b]\)]\)\)\),
-TraditionalForm]\). Note that for its lower indices version: \!\(\*SubscriptBox[\(\[CapitalOmega]\), \(\[Mu]\\\ a\\\ b\)]\) = -\!\(\*SubscriptBox[\(\[CapitalOmega]\), \(\[Mu]\\\ b\\\ a\)]\)";
+spinConnection::usage="spinConnection[coord, metric, vierbein][[mu, a, b]], with mu and b lower indices and a upper index. It uses christoffelS[coord, metric]. See Sean Carroll's book (eq. J21). Note that if we lower a, then it should be antisymmetric in a and b. ";
 
 
 riemannT[coord_List,metric_List]:=Module[{cs,dim,array},
@@ -118,60 +135,8 @@ ricciScalar[coord_List,metric_List]:=Module[{invMetric},
 invMetric=Inverse@metric;
 Tr[invMetric.ricciT[coord,metric]]
 ]
-ricciScalar::usage = "The trace of the Ricci tensor: \!\(\*SuperscriptBox[\(g\), \(\[Mu]\\\ \[Nu]\)]\) \!\(\*SubscriptBox[\(R\), \(\(\\\ \)\(\[Mu]\\\ \[Nu]\)\)]\)";
+ricciScalar::usage = "ricciScalar[coord, metric] is the trace of the Ricci tensor: \!\(\*SuperscriptBox[\(g\), \(\[Mu]\\\ \[Nu]\)]\) \!\(\*SubscriptBox[\(R\), \(\(\\\ \)\(\[Mu]\\\ \[Nu]\)\)]\)";
 
-
-
-formSkeleton[name_][listOflists_List][i__]:=Module[{input,sorted,slist},
-input={i}; (* input component *)
-sorted=Sort@input;
-slist=Sort/@listOflists;(* sort the list of non-vanishing components *)
-If[
-Or@@(Equal[sorted,#]&/@slist),
-Signature[input]HoldForm@name@@sorted,
-0
-]
-]
-formSkeleton::usage="formSkeleton[name][{{1,2,3},{5,6,7}}][1,3,2] returns -HoldForm[name][1,2,3]. The non-specified components are 0. It incorporates the antisymmetry of the forms.";
-
-
-basis[\[CapitalGamma]_][expr_]:=If[
-ToString@Head@expr == ToString@\[CapitalGamma], 
-{expr},
-Cases[Apply[List,expr/.{Plus->List,Times->List}//Flatten],_\[CapitalGamma]]
-]
-basis::usage = "basis[\[CapitalGamma]][expr]. Example: expr = a + b \[CapitalGamma][1] + c \[CapitalGamma][1, 2] + ..., it will extract {\[CapitalGamma][1], \[CapitalGamma][1,2]}.
-Use addUnitBasis[\[CapitalGamma]][expr] to add \[CapitalGamma][] to coefficient a. ";
-
-sort[f_[]]:=1; (*f[] as a unit basis*)
-sort[f_[x__]]:=Signature[{x}]f@@Sort[{x}]
-sort[g__ f_[x__]]:=g Signature[{x}]f@@Sort[{x}]
-sort::usage="It sorts the argument of a function and multiplies it the signature.";
-
-basisSort[\[CapitalGamma]_][x_]:=Module[{base,rule,y,z},
-y=Expand[x];
-base=basis[\[CapitalGamma]][y];
-rule=Table[base[[i]]->(sort/@base)[[i]],{i,1,Length@base}];
-z=y/.rule;
-Collect[z,basis[\[CapitalGamma]][z]]
-]
-basisSort::usage="basisSort[\[CapitalGamma]][expr] collects the expression according to its basis (i.e. function with the specified head). It uses sort[].";
-
-baseCoefForm[\[CapitalGamma]_][expr_]:=Module[{new, base},
-new=basisSort[\[CapitalGamma]][expr];
-base=basis[\[CapitalGamma]][new];
-listsToRule[
-Prepend[base,Identity], 
-Prepend[Coefficient[new,base],new/.\[CapitalGamma]-> zero]
-]
-]
-baseCoefForm::usage="baseCoefForm[\[CapitalGamma]][expr], where expr contains \[CapitalGamma], will return: {basis1 -> coefficient1, ...}. If there's no unit basis, it will be named as Identity.";
-
-addUnitBasis[\[CapitalGamma]_][x__]:=Module[{coefId},
-coefId=x/.\[CapitalGamma]->zero;
-coefId*\[CapitalGamma][]-coefId +x
-]
-addUnitBasis::usage="addUnitBasis[\[CapitalGamma]][expr] adds unity, which is represented by \[CapitalGamma][] to expr if it doesn't have it. This helps to treat all the terms of the expression at the same footing under, for example, NonCommutativeMultiply.";
 
 
 poincarePatch[n_][x_,z_]:=Module[{coord,vierb},
@@ -200,6 +165,15 @@ Product[Sin[ToExpression[ToString[\[Phi]]<>ToString[k]]],{k,1,i-1}],
 ]
 spherical ::usage ="spherical[dim][\[Phi]] -> {coord, vielbeinMatrix}, coord = {\[Phi]1,..., \[Phi]dim}";
 volSph[n_]:=\[Pi]^(n/2)/Gamma[n/2+1]
+volSph::usage="volSph[n]=\!\(\*FractionBox[SuperscriptBox[\(\[Pi]\), \(n/2\)], \(Gamma[n/2 + 1]\)]\), returns the volume of an n-ball.
+volSph[n+1] = surfaceSph[n]/(n+1)";
+surfaceSph[n_]:=(2\[Pi]^((n+1)/2))/Gamma[(n+1)/2]
+surfaceSph::usage="surfaceSph[n]=\!\(\*FractionBox[\(2 \*SuperscriptBox[\(\[Pi]\), \(\((n + 1)\)/2\)]\), \(Gamma[\*FractionBox[\(n + 1\), \(2\)]]\)]\), returns the surface area of an n-sphere. 
+surfaceSph[n+1] = 2\[Pi] volSph[n].";
+
+
+End[]
+EndPackage[]
 
 
 

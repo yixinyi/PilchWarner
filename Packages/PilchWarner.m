@@ -35,30 +35,31 @@ This package has some general features:
 
 
 AppendTo[$Path,ToFileName[{NotebookDirectory[]}]];
-<<geoMetric.m
+<<geoMetric`
+<<commons`
+<<matrixEDC.m
 
 
-Clear[x0,x1,x2,x3,rc,\[Theta],\[Phi],\[Sigma]1,\[Sigma]2,\[Sigma]3, \[Alpha], \[Beta],\[Psi]]
+Clear[
+x0,x1,x2,x3,rc,\[Theta],\[Phi],\[Sigma]1,\[Sigma]2,\[Sigma]3, \[Alpha], \[Beta],\[Psi], r, c,
+ vx, vrc, v\[Theta],v\[Phi],v1, v2,
+PWc, PWr,
+ X1, X2,\[Omega],f, b,B, a1, a2, a3,signOrientation,A,
+F5RR, F5RRlocal,F3RR,F3RRlocal,F3RREuler, H,Hlocal,HEuler,F1RR,F1RRlocal,P,Pcc,Plocalcc,Plocal,Q,Qlocal,
+\[Chi], expDilaton]
+
+
+signature=1; (* Mostly minus, i.e (+, -, -, -,...), see ?metric *)
+
+
+(* Note tha \[Sigma]1, \[Sigma]2 and \[Sigma]3 are forms! *)
+(* Be careful with parity transformations! E.g. move \[Phi] to position 7 will introduce a sign in forms. *)
 
 coordLabel=<|
 x0-> 1,x1-> 2,x2-> 3,x3-> 4,rc-> 5,
 \[Theta]-> 6,\[Sigma]1-> 7,\[Sigma]2-> 8,\[Sigma]3->9,\[Phi]->10
-|>;
-
-coordNDLabel=<|
-x0-> 1,x1-> 2,x2-> 3,x3-> 4,rc-> 5,
-\[Theta]-> 6,\[Alpha]-> 7,\[Beta]-> 8,\[Psi]->9,\[Phi]->10
-|>;
-
-(*coordLabel\[Phi]7=<|
-x0\[Rule] 1,x1\[Rule] 2,x2\[Rule] 3,x3\[Rule] 4,rc\[Rule] 5,
-\[Theta]\[Rule] 6,\[Sigma]1\[Rule] 8,\[Sigma]2\[Rule] 9,\[Sigma]3\[Rule]10,\[Phi]\[Rule]7
-|>;*) (*Be careful with parity transformations!*)
-
-signature=1; (* Mostly minus, i.e (+, -, -, -,...), check ?metric *)
-
-$Assumptions=vrc[rc,\[Theta]]>= 0&&vx[rc,\[Theta]]>= 0&&v\[Theta][rc,\[Theta]]>= 0&&v\[Phi][rc,\[Theta]]>= 0&&v1[rc,\[Theta]]>= 0&&v2[rc,\[Theta]]>= 0&&Reals[c,\[Theta]] && c>= 1 &&c[rc]>= 1&&A[c]>= 1&&X1[rc,\[Theta]]>= 0&&X2[rc,\[Theta]]>= 0(*&&\[Pi]/2\[GreaterEqual] \[Theta]\[GreaterEqual] 0*)(* It gives problems when take limit \[Theta]\[Rule]\[Pi]/2 *);
-
+|>; 
+coordD=Keys[coordLabel];
 vielbeinD:=Module[{EE},
 EE[coordLabel[x0]]=EE[coordLabel[x1]]=EE[coordLabel[x2]]=EE[coordLabel[x3]]=vx[rc,\[Theta]];
 EE[coordLabel[rc]]=vrc[rc,\[Theta]];
@@ -70,7 +71,16 @@ DiagonalMatrix[Array[EE,10]]
 ];
 inVielbeinD:=Inverse@vielbeinD;
 
+(* In order to go to string frame, use this rule to add \[Phi] dependence *)
+v3variables={vx[rc_,\[Theta]_]-> vx[rc,\[Theta],\[Phi]],vrc[rc_,\[Theta]_]-> vrc[rc,\[Theta],\[Phi]],v\[Theta][rc_,\[Theta]_]-> v\[Theta][rc,\[Theta],\[Phi]],v\[Phi][rc_,\[Theta]_]-> v\[Phi][rc,\[Theta],\[Phi]],v1[rc_,\[Theta]_]-> v1[rc,\[Theta],\[Phi]],v2[rc_,\[Theta]_]-> v2[rc,\[Theta],\[Phi]]}; 
+
+
+coordNDLabel=<|
+x0-> 1,x1-> 2,x2-> 3,x3-> 4,rc-> 5,
+\[Theta]-> 6,\[Alpha]-> 7,\[Beta]-> 8,\[Psi]->9,\[Phi]->10
+|>;
 coordND:=Keys[coordNDLabel];
+
 vielbeinND:=Module[{EE3Sphere,aa,aaNew},
 EE3Sphere=\!\(\*
 TagBox[
@@ -133,12 +143,29 @@ aa]
 ];
 vielbeinND::usage=" Euler parametrization for the SU(2) forms, see coordND.
 vielbeinND[[a,\[Mu]]] \[Equal] \!\(\*SubsuperscriptBox[\(E\), \(\[Mu]\), \(a\)]\), where a is the local frame index and \[Mu] is the target space index.";
-
 inVielbeinND:=Inverse@vielbeinND;
 
+assumptions=vrc[rc,\[Theta]]>= 0&&vx[rc,\[Theta]]>= 0&&v\[Theta][rc,\[Theta]]>= 0&&v\[Phi][rc,\[Theta]]>= 0&&v1[rc,\[Theta]]>= 0&&v2[rc,\[Theta]]>= 0&&Reals[c,\[Theta]] && c>= 1 &&c[rc]>= 1&&A[c]>= 1&&X1[rc,\[Theta]]>= 0&&X2[rc,\[Theta]]>= 0(*&&\[Pi]/2\[GreaterEqual] \[Theta]\[GreaterEqual] 0*)(* It gives problems when take limit \[Theta]\[Rule]\[Pi]/2 *);
 
-clearForms:=Clear[F5RR, F5RRlocal,F3RR,F3RRlocal,F3RREuler, H,Hlocal,HEuler,F1RR,F1RRlocal,P,Pcc,Plocalcc,Plocal,Q,Qlocal]
-clearForms
+
+DeclareForms[{1,\[Sigma]1,\[Sigma]2,\[Sigma]3}]
+\[Sigma]Rule={d[\[Sigma]1]-> 2\[Sigma]2\[Wedge]\[Sigma]3,d[\[Sigma]2]-> 2\[Sigma]3\[Wedge]\[Sigma]1,d[\[Sigma]3]-> 2\[Sigma]1\[Wedge]\[Sigma]2};
+toEulerRule={\[Sigma]3-> 1/2 (Sin[\[Alpha]]d[\[Psi]]-Cos[\[Alpha]]Sin[\[Psi]]d[\[Beta]]),
+\[Sigma]2-> 1/2 (Cos[\[Alpha]]d[\[Psi]]+Sin[\[Alpha]]Sin[\[Psi]]d[\[Beta]]),
+\[Sigma]1-> 1/2 (d[\[Alpha]]+Cos[\[Psi]]d[\[Beta]])};
+
+
+formSkeleton[name_][listOflists_List][i__]:=Module[{input,sorted,slist},
+input={i}; (* input component *)
+sorted=Sort@input;
+slist=Sort/@listOflists;(* sort the list of non-vanishing components *)
+If[
+Or@@(Equal[sorted,#]&/@slist),
+Signature[input]HoldForm@name@@sorted,
+0
+]
+]
+formSkeleton::usage="formSkeleton[name][{{1,2,3},{5,6,7}}][1,3,2] returns -HoldForm[name][1,2,3]. The non-specified components are 0. It incorporates the antisymmetry of the forms.";
 
 
 F5list:=Module[{
@@ -150,19 +177,17 @@ Join[list,hodge[[;;,2]]
 ]
 ];
 
-coefF5RR:=Module[{
+F5Rules:=Module[{productInV,coefLocal,coefF5RR},
+productInV=(Times@@(inVielbeinD[[#,#]]&/@{##})&@@@F5list);
+coefF5RR=Module[{
 coef={D[\[Omega][rc,\[Theta]],rc],D[\[Omega][rc,\[Theta]],\[Theta]]},
 hodge
 },
 hodge=FullSimplify@hodgeDual[coef[[#]],F5list[[#]],metric[signature][vielbeinD]]&/@{1,2};
 Join[coef,signOrientation hodge[[;;,1]]] (*The sign is negative for c coordinate, since dc/dr<0. It's defined in cRule and rRule.*)
-]
-
-
-F5Rules:=Module[{
-productInV=(Times@@(inVielbeinD[[#,#]]&/@{##})&@@@F5list),
-coefLocal},
+];
 coefLocal=productInV*coefF5RR;
+
 {listsToRule[F5RR@@@Sort/@F5list,coefF5RR*Signature/@F5list ],listsToRule[F5RRlocal@@@Sort/@F5list,coefLocal*Signature/@F5list]}
 ]
 
@@ -171,8 +196,9 @@ F5::usage= "F5[name][i,j,k,l,m] gives the component of the 5 forms, but as HoldF
 F5RRtilde[i__]:=4F5RR[i]
 
 
-(* 3-forms: F3RR, H, G3 and G3^* *)
 F3list:=Map[coordLabel,#]&/@{{\[Sigma]2,\[Sigma]3,\[Phi]},{\[Sigma]2,\[Sigma]3,\[Theta]},{\[Sigma]1,\[Theta],\[Phi]},{\[Sigma]1,rc,\[Theta]},{\[Sigma]2,\[Sigma]3,rc},{\[Sigma]1,rc,\[Phi]}};
+F3Rules:=Module[{global,local,coefF3RR,coefH,productInV},
+productInV=Times@@(inVielbeinD[[#,#]]&/@{##})&@@@F3list;
 coefF3RR=(\!\(\*
 TagBox[GridBox[{
 {
@@ -340,7 +366,6 @@ GridBoxAlignment->{"Columns" -> {{Center}}, "ColumnsIndexed" -> {}, "Rows" -> {{
 GridBoxSpacings->{"Columns" -> {Offset[0.27999999999999997`], {Offset[0.5599999999999999]}, Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {Offset[0.2], {Offset[0.4]}, Offset[0.2]}, "RowsIndexed" -> {}, "Items" -> {}, "ItemsIndexed" -> {}}],
 Column]\));
 
-F3Rules:=Module[{global,local,productInV=Times@@(inVielbeinD[[#,#]]&/@{##})&@@@F3list},
 (* Global frame *)
 global=Join[listsToRule[F3RR@@@Sort/@F3list,coefF3RR* Signature/@F3list ],
 listsToRule[H@@@Sort/@F3list,coefH *Signature/@F3list]];
@@ -361,6 +386,8 @@ G3localcc[i_?IntegerQ,j_?IntegerQ,k_?IntegerQ]:=f[rc,\[Theta]]( (1-B[rc,\[Theta]
 
 
 F3EulerList:=Map[coordNDLabel,#]&/@{{\[Beta],\[Phi],\[Psi]},{\[Beta],\[Theta],\[Psi]},{\[Alpha],\[Theta],\[Phi]},{\[Beta],\[Theta],\[Phi]},{rc,\[Alpha],\[Theta]},{rc,\[Beta],\[Theta]},{rc,\[Beta],\[Psi]},{rc,\[Alpha],\[Phi]},{rc,\[Beta],\[Phi]}};
+
+F3EulerRules:=Module[{coefF3RREuler,coefHEuler},
 coefF3RREuler=\!\(\*
 TagBox[
 RowBox[{"(", "", 
@@ -635,8 +662,9 @@ GridBoxSpacings->{"Columns" -> {Offset[0.27999999999999997`], {Offset[0.55999999
 Column], "", ")"}],
 Function[BoxForm`e$, MatrixForm[BoxForm`e$]]]\);
 (* Global frame *)
-F3EulerRules:=Join[
+Join[
 listsToRule[F3RREuler@@@Sort/@F3EulerList,coefF3RREuler* Signature/@F3EulerList],listsToRule[HEuler@@@Sort/@F3EulerList,coefHEuler *Signature/@F3EulerList]
+]
 ]
 
 F3Euler[name_][i_Integer,j_Integer,k_Integer]:=formSkeleton[name][F3EulerList][i,j,k]
@@ -651,14 +679,16 @@ expDilaton[rc_,\[Theta]_,\[Phi]_]:=(1-2 b[rc,\[Theta]] Cos[2\[Phi]]+b[rc,\[Theta
 \[Chi][rc_,\[Theta]_,\[Phi]_]:=-((2  b[rc,\[Theta]] Sin[2\[Phi]])/(1-2 b[rc,\[Theta]] Cos[2\[Phi]]+b[rc,\[Theta]]^2))
 
 F1list:=Map[coordLabel,#]&/@{{rc},{\[Theta]},{\[Phi]}}
-coefF1RR={D[\[Chi][rc,\[Theta],\[Phi]],rc],D[\[Chi][rc,\[Theta],\[Phi]],\[Theta]],D[\[Chi][rc,\[Theta],\[Phi]],\[Phi]]}//FullSimplify//Expand;
-coefP=f[rc,\[Theta]]^2 {D[B[rc,\[Theta],\[Phi]],rc],D[B[rc,\[Theta],\[Phi]],\[Theta]],D[B[rc,\[Theta],\[Phi]],\[Phi]]}//FullSimplify//Expand;
-(* Psar is the complex conjugate of P *)
-coefPcc=f[rc,\[Theta]]^2 {D[B[rc,\[Theta],-\[Phi]],rc],D[B[rc,\[Theta],-\[Phi]],\[Theta]],D[B[rc,\[Theta],-\[Phi]],\[Phi]]}//FullSimplify//Expand;
-coefQ={ 0,0,-2 f[rc,\[Theta]]^2 b[rc,\[Theta]]^2}//FullSimplify //Expand;
-
 F1Rules:=Module[
-{global,local,productInV=Times@@(inVielbeinD[[#,#]]&/@{##})&@@@F1list},
+{global,local,coefF1RR,coefP,coefPcc,coefQ, productInV},
+
+productInV=Times@@(inVielbeinD[[#,#]]&/@{##})&@@@F1list;
+
+coefF1RR={D[\[Chi][rc,\[Theta],\[Phi]],rc],D[\[Chi][rc,\[Theta],\[Phi]],\[Theta]],D[\[Chi][rc,\[Theta],\[Phi]],\[Phi]]}//Simplify//Expand;
+coefP=f[rc,\[Theta]]^2 {D[B[rc,\[Theta],\[Phi]],rc],D[B[rc,\[Theta],\[Phi]],\[Theta]],D[B[rc,\[Theta],\[Phi]],\[Phi]]}//Simplify//Expand;
+(* Psar is the complex conjugate of P *)
+coefPcc=f[rc,\[Theta]]^2 {D[B[rc,\[Theta],-\[Phi]],rc],D[B[rc,\[Theta],-\[Phi]],\[Theta]],D[B[rc,\[Theta],-\[Phi]],\[Phi]]}//Simplify//Expand;
+coefQ={ 0,0,-2 f[rc,\[Theta]]^2 b[rc,\[Theta]]^2}//Simplify //Expand;
 
 global=Join[
 listsToRule[F1RR@@@F1list,coefF1RR],
@@ -683,6 +713,14 @@ formSkeleton[name][F1list][i]
 ]
 
 
+potentials={C0-> ((-1+c^2) A[c] Sin[\[Theta]]^2 Sin[2 \[Phi]])/(-2 c Cos[\[Theta]]^2+A[c] (-1-c^2+(-1+c^2) Cos[2 \[Phi]]) Sin[\[Theta]]^2),
+B2-> a3[c,\[Theta]] Sin[\[Phi]] \[Sigma]1\[Wedge]d[\[Phi]]+a2[c,\[Theta]] Cos[\[Phi]] \[Sigma]2\[Wedge]\[Sigma]3+a1[c,\[Theta]] Cos[\[Phi]] d[\[Theta]]\[Wedge]\[Sigma]1,
+C2->a3[c,\[Theta]] Cos[\[Phi]] \[Sigma]1\[Wedge]d[\[Phi]]-a2[c,\[Theta]] Sin[\[Phi]] \[Sigma]2\[Wedge]\[Sigma]3-a1[c,\[Theta]] Sin[\[Phi]] d[\[Theta]]\[Wedge]\[Sigma]1,
+C4-> -a1[c,\[Theta]] a2[c,\[Theta]] Cos[\[Phi]] Sin[\[Phi]] \[Sigma]1\[Wedge]\[Sigma]2\[Wedge]\[Sigma]3\[Wedge]d[\[Theta]]-\[Sigma]1\[Wedge]\[Sigma]2\[Wedge]\[Sigma]3\[Wedge]d[\[Phi]] (a2[c,\[Theta]] a3[c,\[Theta]] Cos[\[Phi]]^2+(c Cos[\[Theta]]^4)/X2[c,\[Theta]])+4 d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3] \[Omega][c,\[Theta]],
+C6-> (A[c] (-2+c A[c]) Cos[\[Theta]]^2 Cos[\[Phi]] Sin[\[Theta]] \[Sigma]1\[Wedge]d[c]\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3])/(2 (-1+c^2)^(5/2))+(A[c] Cos[\[Theta]] (-4 Cos[\[Theta]]^2+c A[c] (-1+3 Cos[2 \[Theta]])) Cos[\[Phi]] \[Sigma]1\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3]\[Wedge]d[\[Theta]])/(4 c (-1+c^2)^(3/2))-(A[c]^2 Cos[\[Theta]]^2 Cos[\[Phi]] Sin[\[Theta]] \[Sigma]2\[Wedge]\[Sigma]3\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3])/(-1+c^2)^(3/2)+(A[c] Cos[\[Theta]]^2 Sin[\[Theta]] (4 Cos[\[Theta]]^2+A[c] (c-3 c Cos[2 \[Theta]])-2 A[c]^2 Sin[\[Theta]]^2) Sin[\[Phi]] \[Sigma]1\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3]\[Wedge]d[\[Phi]])/(4 (-1+c^2)^(3/2) X2[c,\[Theta]]),
+C8-> (A[c]^2 Cos[\[Theta]]^3 Cos[\[Phi]]^2 Sin[\[Theta]] \[Sigma]1\[Wedge]\[Sigma]2\[Wedge]\[Sigma]3\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3]\[Wedge]d[\[Theta]])/(c (-1+c^2))-(A[c]^2 (-2+c A[c]) Cos[\[Theta]]^4 Cos[\[Phi]]^2 Sin[\[Theta]]^2 \[Sigma]1\[Wedge]\[Sigma]2\[Wedge]\[Sigma]3\[Wedge]d[c]\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3])/(2 (-1+c^2)^2 X1[c,\[Theta]])-(A[c]^2 Cos[\[Theta]]^3 (-4 Cos[\[Theta]]^2+c A[c] (-1+3 Cos[2 \[Theta]])) Cos[\[Phi]]^2 Sin[\[Theta]] \[Sigma]1\[Wedge]\[Sigma]2\[Wedge]\[Sigma]3\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3]\[Wedge]d[\[Theta]])/(4 c (-1+c^2) X1[c,\[Theta]])+(A[c] Cos[\[Theta]]^4 \[Sigma]1\[Wedge]\[Sigma]2\[Wedge]\[Sigma]3\[Wedge]d[c]\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3] ((4 c+(-1+c^2) A[c])/c^2+((-8 c Cos[\[Theta]]^2+A[c] (-1+c^2+(3+c^2) Cos[2 \[Theta]])) Cos[2 \[Phi]] Sin[\[Theta]]^2)/X2[c,\[Theta]]^2))/(8 (-1+c^2)^2)-(A[c]^2 Cos[2 \[Phi]] (2 c A[c]+c^2 Cos[\[Theta]]^2+A[c]^2 Sin[\[Theta]]^2) Sin[2 \[Theta]]^3 \[Sigma]1\[Wedge]\[Sigma]2\[Wedge]\[Sigma]3\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3]\[Wedge]d[\[Theta]])/(16 c (-1+c^2) X2[c,\[Theta]]^2)-(A[c]^2 Cos[\[Theta]]^4 Cos[\[Phi]] Sin[\[Theta]]^2 Sin[\[Phi]] \[Sigma]1\[Wedge]\[Sigma]2\[Wedge]\[Sigma]3\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3]\[Wedge]d[\[Phi]])/((-1+c^2) X2[c,\[Theta]])-1/(4 (-1+c^2) X1[c,\[Theta]] X2[c,\[Theta]]) A[c]^2 Cos[\[Theta]]^4 Cos[\[Phi]] Sin[\[Theta]]^2 (4 Cos[\[Theta]]^2+A[c] (c-3 c Cos[2 \[Theta]])-2 A[c]^2 Sin[\[Theta]]^2) Sin[\[Phi]] \[Sigma]1\[Wedge]\[Sigma]2\[Wedge]\[Sigma]3\[Wedge]d[x0]\[Wedge]d[x1]\[Wedge]d[x2]\[Wedge]d[x3]\[Wedge]d[\[Phi]]};
+
+
 PWr:=Module[{},
 clearPWr;
 
@@ -697,6 +735,7 @@ v\[Phi]-> Function[{r,\[Theta]},1/\[Rho][r]^(3/2) ((c[r]X1[r,\[Theta]])/X2[r,\[T
 v1-> Function[{r,\[Theta]},\[Rho][r]^(3/2) (X1[r,\[Theta]]/(c[r]^3 X2[r,\[Theta]]^3))^(1/8) Cos[\[Theta]]],
 v2-> Function[{r,\[Theta]},\[Rho][r]^(3/2) ((c[r]X2[r,\[Theta]])/X1[r,\[Theta]]^3)^(1/8) Cos[\[Theta]]]
 };
+vStringRuler={vx->Function[{r,\[Theta],\[Phi]},((c[r] Sin[\[Phi]]^2 X1[r,\[Theta]]+Cos[\[Phi]]^2 X2[r,\[Theta]])^(1/4) \[Rho][r]^(3/2))/Sqrt[-1+c[r]^2]],vrc->Function[{r,\[Theta],\[Phi]},(c[r] Sin[\[Phi]]^2 X1[r,\[Theta]]+Cos[\[Phi]]^2 X2[r,\[Theta]])^(1/4)/Sqrt[\[Rho][r]]],v1->Function[{r,\[Theta],\[Phi]},(Cos[\[Theta]] (c[r] Sin[\[Phi]]^2 X1[r,\[Theta]]+Cos[\[Phi]]^2 X2[r,\[Theta]])^(1/4) \[Rho][r]^(3/2))/(Sqrt[c[r]] Sqrt[X2[r,\[Theta]]])],v2->Function[{r,\[Theta],\[Phi]},(Cos[\[Theta]] (c[r] Sin[\[Phi]]^2 X1[r,\[Theta]]+Cos[\[Phi]]^2 X2[r,\[Theta]])^(1/4) \[Rho][r]^(3/2))/Sqrt[X1[r,\[Theta]]]],v\[Theta]->Function[{r,\[Theta],\[Phi]},(c[r] Sin[\[Phi]]^2 X1[r,\[Theta]]+Cos[\[Phi]]^2 X2[r,\[Theta]])^(1/4)/(Sqrt[c[r]] \[Rho][r]^(3/2))],v\[Phi]->Function[{r,\[Theta],\[Phi]},(Sin[\[Theta]] (c[r] Sin[\[Phi]]^2 X1[r,\[Theta]]+Cos[\[Phi]]^2 X2[r,\[Theta]])^(1/4))/(Sqrt[X2[r,\[Theta]]] \[Rho][r]^(3/2))]};
 
 formsRules={
 b->Function[{r,\[Theta]},(Sqrt[c[r] X1[r,\[Theta]]]-Sqrt[X2[r,\[Theta]]])/(Sqrt[c[r] X1[r,\[Theta]]]+Sqrt[X2[r,\[Theta]]])],
@@ -734,6 +773,7 @@ v\[Theta]-> Function[{c,\[Theta]},prefactor[c,\[Theta]] 1/Sqrt[c]],
 v\[Phi]-> Function[{c,\[Theta]},prefactor[c,\[Theta]] 1/Sqrt[X2[c,\[Theta]]] Sin[\[Theta]]],
 v1-> Function[{c,\[Theta]},prefactor[c,\[Theta]]Sqrt[A[c]/(c X2[c,\[Theta]])]Cos[\[Theta]]],
 v2-> Function[{c,\[Theta]},prefactor[c,\[Theta]]Sqrt[A[c]/X1[c,\[Theta]]]Cos[\[Theta]]]};
+vStringRulec={vx->Function[{c,\[Theta],\[Phi]},(A[c]^(1/4) (c Sin[\[Phi]]^2 X1[c,\[Theta]]+Cos[\[Phi]]^2 X2[c,\[Theta]])^(1/4))/Sqrt[-1+c^2]],vrc->Function[{c,\[Theta],\[Phi]},(c Sin[\[Phi]]^2 X1[c,\[Theta]]+Cos[\[Phi]]^2 X2[c,\[Theta]])^(1/4)/((-1+c^2) A[c]^(3/4))],v1->Function[{c,\[Theta],\[Phi]},(A[c]^(1/4) Cos[\[Theta]] (c Sin[\[Phi]]^2 X1[c,\[Theta]]+Cos[\[Phi]]^2 X2[c,\[Theta]])^(1/4))/(Sqrt[c] Sqrt[X2[c,\[Theta]]])],v2->Function[{c,\[Theta],\[Phi]},(A[c]^(1/4) Cos[\[Theta]] (c Sin[\[Phi]]^2 X1[c,\[Theta]]+Cos[\[Phi]]^2 X2[c,\[Theta]])^(1/4))/Sqrt[X1[c,\[Theta]]]],v\[Theta]->Function[{c,\[Theta],\[Phi]},(c Sin[\[Phi]]^2 X1[c,\[Theta]]+Cos[\[Phi]]^2 X2[c,\[Theta]])^(1/4)/(Sqrt[c] A[c]^(1/4))],v\[Phi]->Function[{c,\[Theta],\[Phi]},(Sin[\[Theta]] (c Sin[\[Phi]]^2 X1[c,\[Theta]]+Cos[\[Phi]]^2 X2[c,\[Theta]])^(1/4))/(A[c]^(1/4) Sqrt[X2[c,\[Theta]]])]};
 formsRules={
 b-> Function[{c,\[Theta]},(Sqrt[c X1[c,\[Theta]]]-Sqrt[X2[c,\[Theta]]])/(Sqrt[c X1[c,\[Theta]]]+Sqrt[X2[c,\[Theta]]])],
 B-> Function[{c,\[Theta],\[Phi]},b[c,\[Theta]]E^(I 2\[Phi])],
@@ -751,20 +791,18 @@ X1->Function[{c,\[Theta]},Cos[\[Theta]]^2+c A[c] Sin[\[Theta]]^2],
 X2->Function[{c,\[Theta]},c Cos[\[Theta]]^2+A[c] Sin[\[Theta]]^2]
 };
 
-ARule={A'[c_]-> (2 (-1+c A[c]))/(-1+c^2),\!\(\*
-TagBox[
-StyleBox[
-RowBox[{
-RowBox[{"Derivative", "[", "2", "]"}], "[", "A", "]"}],
-ShowSpecialCharacters->False,
-ShowStringCharacters->True,
-NumberMarks->True],
-FullForm]\)[c_]-> (2 A[c])/(-1+c^2)};
+ARule={A'[c_]-> (2 (-1+c A[c]))/(-1+c^2),A''[c_]-> (2 A[c])/(-1+c^2)};
 
 explicitARule={A-> Function[c,c+(c^2-1) 1/2 Log[(c-1)/(c+1)]]};
 ]
 PWc::usage="It contains: cRule, vRule (vierbeins), formsRules (apply more than once), X1X2Rule, ARule and explicitARule (A[c]=\[Rho][c\!\(\*SuperscriptBox[\(]\), \(6\)]\))";
 clearPWc:=Clear[prefactor,vRule,formsRules,X1X2Rule,ARule,explicitARule,cRule];
+
+
+Protect[
+x0,x1,x2,x3,rc,\[Theta],\[Phi],\[Sigma]1,\[Sigma]2,\[Sigma]3, \[Alpha], \[Beta],\[Psi], r, c,
+ vx, vrc, v\[Theta],v\[Phi],v1, v2,
+ X1, X2,\[Omega],f, b,B, a1, a2, a3,signOrientation,A];
 
 
 
